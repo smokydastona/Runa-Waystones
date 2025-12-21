@@ -2,7 +2,12 @@
 
 All notable changes to the Waystone Button Injector mod will be documented in this file.
 
-> Note: Mod version numbers are auto-generated from the git commit count (see `build.gradle`). If the repository history is ever reset, version numbers may restart.
+> Note: Mod version numbers are auto-generated from git (see `build.gradle`). Starting at `4.0.0`, the patch number is the number of commits since the 4.0.0 bump.
+
+## [4.0.0] - 2025-12-21
+
+### Changed
+- Versioning bumped to `4.0.0` and patch numbers now increment from this baseline
 
 ## [3.0.9] - 2025-12-21
 

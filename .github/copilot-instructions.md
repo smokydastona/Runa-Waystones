@@ -120,7 +120,7 @@ Get-Content $newest.FullName -Tail 400
 
 ## Version Management
 
-Version format: `3.0.{git-commit-count}`
-- Auto-increments from git commit history
+Version format: `4.0.{commits-since-4.0.0-bump}`
+- Auto-increments from git commit history since the 4.0.0 bump
 - Tags trigger GitHub Actions release workflow
 - User decides when to tag, not the AI
