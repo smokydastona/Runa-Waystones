@@ -13,6 +13,7 @@ Every tracked PNG texture under `src/main/resources/assets`, with its pixel dime
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/portstone.png | 64x32 |
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/regular.png | 64x32 |
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/sharestone.png | 64x32 |
+| src/main/resources/assets/waystoneinjector/textures/gui/buttons/sandy.png | 64x32 |
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/warp_scroll.png | 64x32 |
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/warp_stone.png | 64x32 |
 
@@ -27,6 +28,7 @@ Every tracked PNG texture under `src/main/resources/assets`, with its pixel dime
 | src/main/resources/assets/waystoneinjector/textures/gui/overlays/portstone.png | 220x36 |
 | src/main/resources/assets/waystoneinjector/textures/gui/overlays/regular.png | 220x36 |
 | src/main/resources/assets/waystoneinjector/textures/gui/overlays/sharestone.png | 220x36 |
+| src/main/resources/assets/waystoneinjector/textures/gui/overlays/sandy.png | 220x36 |
 | src/main/resources/assets/waystoneinjector/textures/gui/overlays/warp_scroll.png | 220x36 |
 | src/main/resources/assets/waystoneinjector/textures/gui/overlays/warp_stone.png | 220x36 |
 
@@ -105,6 +107,7 @@ Every tracked PNG texture under `src/main/resources/assets`, with its pixel dime
 | src/main/resources/assets/waystoneinjector/textures/gui/waystone_endstone.png | 1024x1024 |
 | src/main/resources/assets/waystoneinjector/textures/gui/waystone_mossy.png | 273x273 |
 | src/main/resources/assets/waystoneinjector/textures/gui/waystone_regular.png | 1024x1024 |
+| src/main/resources/assets/waystoneinjector/textures/gui/waystone_sandy.png | 1024x1024 |
 
 ## Slot Icons (Curios)
 

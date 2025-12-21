@@ -99,6 +99,7 @@ public class WaystoneTypeRegistry {
             case "blackstone" -> 0xFF2A2729;    // Dark gray
             case "deepslate" -> 0xFF494949;     // Medium gray
             case "endstone" -> 0xFFDFDFA0;      // Pale yellow
+            case "sandy" -> 0xFFD8C68A;         // Sand
             case "regular" -> 0xFF8B5A2B;       // Brown
             default -> 0xFFFFFFFF;              // White (unknown)
         };

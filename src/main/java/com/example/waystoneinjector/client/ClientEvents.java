@@ -45,6 +45,7 @@ public class ClientEvents {
     private static final ResourceLocation TEXTURE_BLACKSTONE = new ResourceLocation("waystoneinjector", "textures/gui/waystone_blackstone.png");
     private static final ResourceLocation TEXTURE_DEEPSLATE = new ResourceLocation("waystoneinjector", "textures/gui/waystone_deepslate.png");
     private static final ResourceLocation TEXTURE_ENDSTONE = new ResourceLocation("waystoneinjector", "textures/gui/waystone_endstone.png");
+    private static final ResourceLocation TEXTURE_SANDY = new ResourceLocation("waystoneinjector", "textures/gui/waystone_sandy.png");
     private static final ResourceLocation TEXTURE_SHARESTONE = new ResourceLocation("waystoneinjector", "textures/gui/sharestone.png");
     private static final ResourceLocation TEXTURE_WARP_PLATE = new ResourceLocation("waystoneinjector", "textures/gui/warp_plate.png");
     private static final ResourceLocation TEXTURE_PORTSTONE = new ResourceLocation("waystoneinjector", "textures/gui/portstone.png");
@@ -55,6 +56,7 @@ public class ClientEvents {
     private static final ResourceLocation OVERLAY_BLACKSTONE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/blackstone.png");
     private static final ResourceLocation OVERLAY_DEEPSLATE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/deepslate.png");
     private static final ResourceLocation OVERLAY_ENDSTONE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/endstone.png");
+    private static final ResourceLocation OVERLAY_SANDY = new ResourceLocation("waystoneinjector", "textures/gui/overlays/sandy.png");
     private static final ResourceLocation OVERLAY_SHARESTONE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/sharestone.png");
     private static final ResourceLocation OVERLAY_WARP_SCROLL = new ResourceLocation("waystoneinjector", "textures/gui/overlays/warp_scroll.png");
     private static final ResourceLocation OVERLAY_WARP_STONE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/warp_stone.png");
@@ -172,6 +174,8 @@ public class ClientEvents {
             detectedType = "deepslate";
         } else if (path.contains("end_stone") || path.contains("endstone")) {
             detectedType = "endstone";
+        } else if (path.contains("sandy")) {
+            detectedType = "sandy";
         }
         
         currentWaystoneType.set(detectedType);
@@ -412,6 +416,9 @@ public class ClientEvents {
                                     } else if (lowerType.contains("end_stone") || lowerType.contains("endstone")) {
                                         detectedType = "endstone";
                                         System.out.println("[WaystoneInjector] ✓ Detected END STONE WAYSTONE");
+                                    } else if (lowerType.contains("sandy")) {
+                                        detectedType = "sandy";
+                                        System.out.println("[WaystoneInjector] ✓ Detected SANDY WAYSTONE");
                                     } else {
                                         detectedType = "regular";
                                         System.out.println("[WaystoneInjector] ✓ Detected REGULAR WAYSTONE");
@@ -796,6 +803,7 @@ public class ClientEvents {
             case "blackstone" -> TEXTURE_BLACKSTONE;
             case "deepslate" -> TEXTURE_DEEPSLATE;
             case "endstone" -> TEXTURE_ENDSTONE;
+            case "sandy" -> TEXTURE_SANDY;
             case "warp_plate" -> TEXTURE_WARP_PLATE;
             case "portstone" -> TEXTURE_PORTSTONE;
             case "warp_scroll" -> TEXTURE_WARP_SCROLL;
@@ -883,6 +891,7 @@ public class ClientEvents {
             case "blackstone" -> OVERLAY_BLACKSTONE;
             case "deepslate" -> OVERLAY_DEEPSLATE;
             case "endstone" -> OVERLAY_ENDSTONE;
+            case "sandy" -> OVERLAY_SANDY;
             case "sharestone" -> OVERLAY_SHARESTONE;
             case "warp_scroll" -> OVERLAY_WARP_SCROLL;
             case "warp_stone" -> OVERLAY_WARP_STONE;
