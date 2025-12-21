@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+set -eu
+
+# Blocks committing common personal-info leaks.
+# Enable once per machine:
+#   git config core.hooksPath .githooks
+
+blocked_paths_regex='(^|/)(debug_logs/|logs/|run/|decompiled_working/|temp_decompile/|working_extract/)|(^|/)crash\.log$|\.log$|\.class$|(^|/)cfr\.jar$'
+
+# 1) Block committing forbidden files by path
+staged_paths=$(git diff --cached --name-only -z | tr '\0' '\n' || true)
+if [ -n "$staged_paths" ]; then
+  echo "$staged_paths" | grep -E "$blocked_paths_regex" >/dev/null 2>&1 && {
+    echo "ERROR: Attempting to commit forbidden log/runtime/decompile artifacts."
+    echo "Remove these files from the commit (or delete them) and try again."
+    echo "Blocked pattern: $blocked_paths_regex"
+    exit 1
+  }
+fi
+
+# 2) Block committing common personal strings in staged content
+# Note: grep -I skips binary files.
+blocked_content_regex='C:\\Users\\|curseforge\\minecraft\\Instances|--username|--uuid|--accessToken|--clientId|--xuid'
+
+git diff --cached --no-color | grep -I -n -E "$blocked_content_regex" >/dev/null 2>&1 && {
+  echo "ERROR: Staged changes contain personal/runtime identifiers."
+  echo "Blocked content pattern: $blocked_content_regex"
+  echo "Fix/sanitize the staged content before committing."
+  exit 1
+}
+
+exit 0

@@ -39,6 +39,44 @@ git push
 
 This triggers GitHub Actions to compile the mod. The workspace must stay clean - no `build/` or `.gradle/` directories.
 
+## Personal Info Guardrail (Mandatory)
+
+**Goal:** never commit/push anything that contains personal machine paths, usernames, launcher args, tokens, UUIDs, or runtime logs.
+
+Before **every** `git commit`, you MUST do all of the following:
+
+1) **Refuse to commit any logs or runtime artifacts**
+- Never commit: `*.log`, `crash.log`, `debug_logs/`, `logs/`, `run/`, `decompiled_working/`, `temp_decompile/`, `working_extract/`, `*.class`, `cfr.jar`.
+
+2) **Scan staged changes for personal strings**
+Run these commands from repo root and ensure they return **no matches**:
+
+```powershell
+git diff --cached --name-only
+
+# Common personal/path leaks
+git diff --cached | Select-String -Pattern "C:\\Users\\" -AllMatches
+git diff --cached | Select-String -Pattern "curseforge\\minecraft\\Instances" -AllMatches
+
+# Common launcher arg leaks (tokens/ids/usernames)
+git diff --cached | Select-String -Pattern "--username" -AllMatches
+git diff --cached | Select-String -Pattern "--uuid" -AllMatches
+git diff --cached | Select-String -Pattern "--accessToken" -AllMatches
+git diff --cached | Select-String -Pattern "--clientId" -AllMatches
+git diff --cached | Select-String -Pattern "--xuid" -AllMatches
+```
+
+If there are matches: stop, remove/sanitize the content, and re-run the scan.
+
+3) **Recommended enforcement: enable the repo pre-commit hook**
+This repo includes a pre-commit hook that blocks committing common personal-info leaks.
+
+One-time setup (per machine):
+
+```powershell
+git config core.hooksPath .githooks
+```
+
 ## Log Handling (When You Say “Read The Log”)
 
 **Rule:** When the user says **“read the log”**, always interpret it as:

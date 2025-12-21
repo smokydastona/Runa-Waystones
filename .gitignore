@@ -28,6 +28,11 @@ out/
 run/
 logs/
 
+# Crash/runtime logs (never commit)
+*.log
+crash.log
+hs_err_pid*.log
+
 # Local debug logs (never commit)
 debug_logs/
 
