@@ -1,6 +1,6 @@
 {
   "order": 50,
   "size": 1,
-  "icon": "waystones:warp_stone",
+  "icon": "waystoneinjector:slot/waystones",
   "add_cosmetic": true
 }
