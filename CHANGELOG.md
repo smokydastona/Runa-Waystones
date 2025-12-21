@@ -2,6 +2,22 @@
 
 All notable changes to the Waystone Button Injector mod will be documented in this file.
 
+> Note: Mod version numbers are auto-generated from the git commit count (see `build.gradle`). If the repository history is ever reset, version numbers may restart.
+
+## [3.0.9] - 2025-12-21
+
+### Added
+- Curios slot icon validation script (`validate_slot_icon.ps1`) to ensure the slot icon PNG is readable and 16×16
+- Texture size reference guide (`TEXTURE_SIZES.md`) listing the expected dimensions for all shipped textures
+
+### Changed
+- Curios slot definition now uses a proper Curios slot icon texture reference (`waystoneinjector:slot/waystones`) instead of an item id
+- Example datapack folder now points at the mod-provided slot icon texture so only one PNG needs to be maintained
+
+### Fixed
+- Curios slot icon missing texture (added a real slot icon texture under `assets/.../textures/slot/`)
+- Teleport keybind now detects Waystones teleport items equipped in Curios slots more reliably across Curios versions
+
 ## [3.0.138] - 2025-12-05
 
 ### Added
