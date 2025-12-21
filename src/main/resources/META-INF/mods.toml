@@ -1,0 +1,75 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+
+# Client-side only mod - server doesn't need it installed
+[[mods]]
+modId="waystoneinjector"
+version="${file.jarVersion}"
+displayName="Waystone Button Injector"
+description="Client-side mod that adds server transfer buttons to Waystones GUI. Includes built-in death/sleep redirects and server compatibility bypass. Handles server connections directly without requiring server-side installation."
+authors=["RunawayStone"]
+# This mod is CLIENT ONLY and does not need to be installed on the server
+displayURL="https://github.com/smokydastona/WaystoneButtonInjector"
+
+# Mixin config for server compatibility bypass
+[[mixins]]
+config = "waystoneinjector.mixins.json"
+
+# Tell servers we provide Feverdream functionality
+[[provides.waystoneinjector]]
+    modId="feverdream"
+
+[[dependencies.waystoneinjector]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.waystoneinjector]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1]"
+    ordering="NONE"
+    side="CLIENT"
+
+# Waystones is required - will auto-download from CurseForge if missing
+[[dependencies.waystoneinjector]]
+    modId="waystones"
+    mandatory=true
+    versionRange="[14.1.0,)"
+    ordering="AFTER"
+    side="CLIENT"
+
+# Balm is required by Waystones - will auto-download if missing
+[[dependencies.waystoneinjector]]
+    modId="balm"
+    mandatory=true
+    versionRange="[7.0.0,)"
+    ordering="AFTER"
+    side="CLIENT"
+
+# MouseTweaks for better inventory management - will auto-download if missing
+[[dependencies.waystoneinjector]]
+    modId="mousetweaks"
+    mandatory=true
+    versionRange="[2.25.0,)"
+    ordering="NONE"
+    side="CLIENT"
+
+# MyServerIsCompatible for server compatibility - will auto-download if missing
+[[dependencies.waystoneinjector]]
+    modId="myserveriscompatible"
+    mandatory=true
+    versionRange="[1.0,)"
+    ordering="NONE"
+    side="CLIENT"
+
+# Curios is optional - when present we can detect waystone teleport items in Curios slots
+[[dependencies.waystoneinjector]]
+    modId="curios"
+    mandatory=false
+    versionRange="[5.0.0,)"
+    ordering="AFTER"
+    side="CLIENT"

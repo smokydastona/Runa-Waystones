@@ -1,0 +1,105 @@
+# Waystone Button Injector
+
+Forge 1.20.1 **client-side mod** that adds custom configurable buttons to the Waystones selection screen and listens for server redirect packets.
+
+## Features
+
+## How It Works
+
+### Manual Redirection (Waystone Buttons)
+1. Player clicks a button in the Waystones GUI
+
+## Server datapack: Curios slot for Waystones items
+
+This repo includes a Curios datapack that adds a dedicated Curios slot for Waystones teleport items.
+
+- Slot id: `waystones`
+- Allowed items (tag): `#curios:waystones` (Warp Stone / Warp Scroll / Return Scroll / Bound Scroll)
+
+**Singleplayer / LAN (integrated server):**
+- This mod bundles the datapack inside the client jar, so it “just works” without you manually installing a datapack.
+
+**Dedicated server:**
+- The server must have the datapack installed (clients cannot automatically install server datapacks).
+- Use the provided zip at `datapacks/curios_runa_waystones_slot/curios_runa_waystones_slot.zip` (or the folder next to it).
+- Put it into the world folder: `<world>/datapacks/`
+- Restart the server or run `/reload`.
+
+**How it works with this mod:**
+- This mod stays client-side.
+- When Curios is installed, the keybind can request Curios to open its menu (server-authoritative), temporarily move the teleport item into your hotbar to use it, then move it back.
+2. **Client directly connects to the new server** (no commands, no OP needed!)
+3. Player is seamlessly transferred to the new server
+
+### Automatic Redirection (Built-in Death/Sleep Detection)
+1. Mod detects when player dies or sleeps
+2. Checks config for matching server redirect mapping
+3. Client automatically connects to the configured destination server
+4. Perfect for death-based server transfers!
+
+No server-side mod required - all detection happens client-side!
+
+This approach means:
+- **No OP permissions required** - Everything happens client-side
+- **No server-side installation needed** - Purely client-side mod
+- **Works with any Minecraft server** - No special setup needed
+
+## Configuration
+
+After first run, edit `config/waystoneinjector-common.toml`. By default, no buttons are configured:
+
+```toml
+[buttons]
+    # Button labels (displayed on buttons)
+    labels = []
+    
+    # Commands to execute (without leading /)
+    commands = []
+```
+
+### Example Configuration
+
+Add your own server buttons:
+
+```toml
+[buttons]
+    labels = ["Server 1", "Server 2"]
+    commands = [
+        "redirect @s server1.example.com",
+        "redirect @s server2.example.com"
+    ]
+```
+
+Add as many buttons as needed - just ensure labels and commands arrays have the same length.
+
+## Build
+
+**DO NOT build locally!** This project uses GitHub Actions for automated builds.
+
+### To get the latest build:
+1. Push your changes to GitHub
+2. GitHub Actions will automatically build the mod
+3. Download the JAR from:
+   - GitHub Actions artifacts (for development builds)
+   - GitHub Releases page (for stable releases)
+
+### Manual local builds are NOT supported
+Local builds may fail or produce inconsistent results. Always use GitHub Actions.
+
+## Installation
+1. **Client:** Install WaystoneButtonInjector in your client's `mods/` folder
+2. **Server (optional):** If using Feverdream auto-redirect, install the Feverdream server mod
+3. Configure buttons in `config/waystoneinjector-client.toml`
+4. **That's it!** No server-side installation of WaystoneButtonInjector needed
+
+## Death/Sleep Redirection
+Configure automatic server redirects when you die or sleep using the `feverdream.redirects` config option. Each server can have separate death and sleep destinations. Example:
+
+```toml
+[feverdream]
+    redirects = [
+        "death:survival.example.com->hub.example.com",
+        "sleep:creative.example.com->lobby.example.com"
+    ]
+    deathCount = 1
+```

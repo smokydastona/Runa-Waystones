@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "waystones:warp_stone",
+    "waystones:warp_scroll",
+    "waystones:return_scroll",
+    "waystones:bound_scroll"
+  ]
+}

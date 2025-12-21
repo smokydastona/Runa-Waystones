@@ -1,0 +1,6 @@
+{
+  "pack": {
+    "pack_format": 15,
+    "description": "WaystoneInjector: Adds a Curios slot for Waystones teleport items (server datapack)"
+  }
+}

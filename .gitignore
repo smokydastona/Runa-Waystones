@@ -1,0 +1,45 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Eclipse
+bin/
+*.launch
+.settings/
+.metadata/
+.classpath
+.project
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Minecraft runs
+run/
+logs/
+
+# Local debug logs (never commit)
+debug_logs/
+
+# Decompiled / extracted artifacts (never commit)
+decompiled_working/
+temp_decompile/
+working_extract/
+
+# Local tooling (never commit)
+cfr.jar
+
+# Local libs (do not commit)
+libs/*.jar
+
+gradle-temp.zip
