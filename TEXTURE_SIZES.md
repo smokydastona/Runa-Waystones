@@ -40,7 +40,22 @@ Example in this repo:
 
 ### Current note
 
-- The current `assets/waystoneinjector/textures/slot/waystones.png` is **20×20** (it will usually still render, but 16×16 avoids clipping/blur).
+- The current `assets/waystoneinjector/textures/slot/waystones.png` is **whatever you last saved it as**.
+
+### Validate your slot icon (recommended)
+
+This repo includes a small validator script:
+
+```powershell
+cd "<repo>\\WaystoneButtonInjector"
+.\\validate_slot_icon.ps1
+```
+
+If it reports a non-16×16 icon and you want it auto-resized (with a `.bak` backup):
+
+```powershell
+.\\validate_slot_icon.ps1 -Fix -Force
+```
 
 ## Portal Animations
 
