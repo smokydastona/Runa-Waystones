@@ -2,9 +2,10 @@
 
 Every tracked PNG texture under `src/main/resources/assets`, with its pixel dimensions.
 
+## Waystone Menu Buttons (64x32)
+
 | Texture | Size |
 |---|---:|
-| src/main/resources/assets/waystoneinjector/textures/gui/bound_scroll.png | 256x256 |
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/blackstone.png | 64x32 |
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/deepslate.png | 64x32 |
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/endstone.png | 64x32 |
@@ -14,7 +15,41 @@ Every tracked PNG texture under `src/main/resources/assets`, with its pixel dime
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/sharestone.png | 64x32 |
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/warp_scroll.png | 64x32 |
 | src/main/resources/assets/waystoneinjector/textures/gui/buttons/warp_stone.png | 64x32 |
+
+## Waystone Menu Overlays (220x36)
+
+| Texture | Size |
+|---|---:|
+| src/main/resources/assets/waystoneinjector/textures/gui/overlays/blackstone.png | 220x36 |
+| src/main/resources/assets/waystoneinjector/textures/gui/overlays/deepslate.png | 220x36 |
+| src/main/resources/assets/waystoneinjector/textures/gui/overlays/endstone.png | 220x36 |
+| src/main/resources/assets/waystoneinjector/textures/gui/overlays/mossy.png | 220x36 |
+| src/main/resources/assets/waystoneinjector/textures/gui/overlays/portstone.png | 220x36 |
+| src/main/resources/assets/waystoneinjector/textures/gui/overlays/regular.png | 220x36 |
+| src/main/resources/assets/waystoneinjector/textures/gui/overlays/sharestone.png | 220x36 |
+| src/main/resources/assets/waystoneinjector/textures/gui/overlays/warp_scroll.png | 220x36 |
+| src/main/resources/assets/waystoneinjector/textures/gui/overlays/warp_stone.png | 220x36 |
+
+## Portal Animations (256x4096)
+
+| Texture | Size |
+|---|---:|
+| src/main/resources/assets/waystoneinjector/textures/gui/portal_animation.png | 256x4096 |
+| src/main/resources/assets/waystoneinjector/textures/gui/portstone_portal.png | 256x4096 |
+
+## Mystical Strips (16x80)
+
+| Texture | Size |
+|---|---:|
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_1.png | 16x80 |
+| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_2.png | 16x80 |
+| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_3.png | 16x80 |
+| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_4.png | 16x80 |
+| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_5.png | 16x80 |
+| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_6.png | 16x80 |
+| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_7.png | 16x80 |
+| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_8.png | 16x80 |
+| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_9.png | 16x80 |
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_10.png | 16x80 |
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_11.png | 16x80 |
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_12.png | 16x80 |
@@ -25,7 +60,6 @@ Every tracked PNG texture under `src/main/resources/assets`, with its pixel dime
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_17.png | 16x80 |
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_18.png | 16x80 |
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_19.png | 16x80 |
-| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_2.png | 16x80 |
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_20.png | 16x80 |
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_21.png | 16x80 |
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_22.png | 16x80 |
@@ -33,27 +67,11 @@ Every tracked PNG texture under `src/main/resources/assets`, with its pixel dime
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_24.png | 16x80 |
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_25.png | 16x80 |
 | src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_26.png | 16x80 |
-| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_3.png | 16x80 |
-| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_4.png | 16x80 |
-| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_5.png | 16x80 |
-| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_6.png | 16x80 |
-| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_7.png | 16x80 |
-| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_8.png | 16x80 |
-| src/main/resources/assets/waystoneinjector/textures/gui/mystical/mystic_9.png | 16x80 |
-| src/main/resources/assets/waystoneinjector/textures/gui/overlays/blackstone.png | 220x36 |
-| src/main/resources/assets/waystoneinjector/textures/gui/overlays/deepslate.png | 220x36 |
-| src/main/resources/assets/waystoneinjector/textures/gui/overlays/endstone.png | 220x36 |
-| src/main/resources/assets/waystoneinjector/textures/gui/overlays/mossy.png | 220x36 |
-| src/main/resources/assets/waystoneinjector/textures/gui/overlays/portstone.png | 220x36 |
-| src/main/resources/assets/waystoneinjector/textures/gui/overlays/regular.png | 220x36 |
-| src/main/resources/assets/waystoneinjector/textures/gui/overlays/sharestone.png | 220x36 |
-| src/main/resources/assets/waystoneinjector/textures/gui/overlays/warp_scroll.png | 220x36 |
-| src/main/resources/assets/waystoneinjector/textures/gui/overlays/warp_stone.png | 220x36 |
-| src/main/resources/assets/waystoneinjector/textures/gui/portal_animation.png | 256x4096 |
-| src/main/resources/assets/waystoneinjector/textures/gui/portstone.png | 256x256 |
-| src/main/resources/assets/waystoneinjector/textures/gui/portstone_portal.png | 256x4096 |
-| src/main/resources/assets/waystoneinjector/textures/gui/return_scroll.png | 256x256 |
-| src/main/resources/assets/waystoneinjector/textures/gui/sharestone.png | 1024x1024 |
+
+## Sharestone Portal Color Strips (16x512)
+
+| Texture | Size |
+|---|---:|
 | src/main/resources/assets/waystoneinjector/textures/gui/sharestone_portals/black.png | 16x512 |
 | src/main/resources/assets/waystoneinjector/textures/gui/sharestone_portals/blue.png | 16x512 |
 | src/main/resources/assets/waystoneinjector/textures/gui/sharestone_portals/brown.png | 16x512 |
@@ -70,6 +88,15 @@ Every tracked PNG texture under `src/main/resources/assets`, with its pixel dime
 | src/main/resources/assets/waystoneinjector/textures/gui/sharestone_portals/red.png | 16x512 |
 | src/main/resources/assets/waystoneinjector/textures/gui/sharestone_portals/white.png | 16x512 |
 | src/main/resources/assets/waystoneinjector/textures/gui/sharestone_portals/yellow.png | 16x512 |
+
+## WaystoneInjector GUI Textures
+
+| Texture | Size |
+|---|---:|
+| src/main/resources/assets/waystoneinjector/textures/gui/bound_scroll.png | 256x256 |
+| src/main/resources/assets/waystoneinjector/textures/gui/portstone.png | 256x256 |
+| src/main/resources/assets/waystoneinjector/textures/gui/return_scroll.png | 256x256 |
+| src/main/resources/assets/waystoneinjector/textures/gui/sharestone.png | 1024x1024 |
 | src/main/resources/assets/waystoneinjector/textures/gui/warp_plate.png | 256x256 |
 | src/main/resources/assets/waystoneinjector/textures/gui/warp_scroll.png | 256x256 |
 | src/main/resources/assets/waystoneinjector/textures/gui/warp_stone.png | 256x256 |
@@ -78,7 +105,17 @@ Every tracked PNG texture under `src/main/resources/assets`, with its pixel dime
 | src/main/resources/assets/waystoneinjector/textures/gui/waystone_endstone.png | 1024x1024 |
 | src/main/resources/assets/waystoneinjector/textures/gui/waystone_mossy.png | 273x273 |
 | src/main/resources/assets/waystoneinjector/textures/gui/waystone_regular.png | 1024x1024 |
+
+## Slot Icons (Curios)
+
+| Texture | Size |
+|---|---:|
 | src/main/resources/assets/waystoneinjector/textures/slot/waystones.png | 16x16 |
+
+## Waystones UI Textures
+
+| Texture | Size |
+|---|---:|
 | src/main/resources/assets/waystones/textures/gui/checkbox.png | 256x256 |
 | src/main/resources/assets/waystones/textures/gui/inventory_button.png | 16x16 |
 | src/main/resources/assets/waystones/textures/gui/menu/warp_plate.png | 256x256 |
