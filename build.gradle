@@ -5,29 +5,29 @@ plugins {
 
 group = 'com.example'
 
-// Auto-increment version based on git commit count
+// Auto-increment version based on git commit count.
 //
 // Versioning policy:
-// - 4.0.0 is the bump baseline
-// - Patch version increments by number of commits since the bump
-//
-// This value must match the git commit count of the commit that introduced the 4.0.0 bump.
-// Current repo state: HEAD commit count was 10 before the bump commit, so the bump commit will be 11.
-def VERSION_4_0_0_BASE_COMMIT_COUNT = 11
+// - Version format: 3.0.{git-commit-count}
+// - Patch increments on every commit.
+def VERSION_PREFIX = '3.0'
 def getVersionFromGit() {
     try {
-        def proc = 'git rev-list --count HEAD'.execute()
+        def pb = new ProcessBuilder('git', 'rev-list', '--count', 'HEAD')
+        pb.directory(project.rootDir)
+        pb.redirectErrorStream(true)
+        def proc = pb.start()
+        def output = proc.inputStream.getText('UTF-8').trim()
         proc.waitFor()
         if (proc.exitValue() == 0) {
-            def commitCount = Integer.parseInt(proc.text.trim())
-            def patch = commitCount - VERSION_4_0_0_BASE_COMMIT_COUNT
-            if (patch < 0) patch = 0
-            return "4.0.${patch}"
+            def commitCount = Integer.parseInt(output)
+            return "${VERSION_PREFIX}.${commitCount}"
         }
+        println "git rev-list failed (${proc.exitValue()}): ${output}"
     } catch (Exception e) {
-        println "Git not available, using fallback version"
+        println "Git not available, using fallback version (${e.class.simpleName})"
     }
-    return '4.0.0'
+    return "${VERSION_PREFIX}.0"
 }
 
 version = getVersionFromGit()
