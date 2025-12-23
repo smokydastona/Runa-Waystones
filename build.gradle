@@ -8,10 +8,10 @@ group = 'com.example'
 // Auto-increment version based on git commit count.
 //
 // Versioning policy:
-// - Version format: 3.0.{git-commit-count}
+// - Version format: 4.0.{git-commit-count}
 // - Patch increments on every commit.
 def getVersionFromGit() {
-    def versionPrefix = '3.0'
+    def versionPrefix = '4.0'
     try {
         def pb = new ProcessBuilder('git', 'rev-list', '--count', 'HEAD')
         pb.directory(project.rootDir)
