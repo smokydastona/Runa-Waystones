@@ -630,6 +630,39 @@ public class ClientEvents {
                 Object list = listField.get(screen);
                 currentWaystoneList.set(list);
                 System.out.println("[WaystoneInjector] Found waystone list widget for keyboard navigation");
+                return;
+            }
+
+            // Fallback: scan all declared fields for something that looks like a list widget
+            for (Field field : screen.getClass().getDeclaredFields()) {
+                try {
+                    field.setAccessible(true);
+                    Object value = field.get(screen);
+                    if (value == null) continue;
+                    String simpleName = value.getClass().getSimpleName();
+                    if (simpleName.contains("WaystoneList") || simpleName.contains("SelectionList") || simpleName.contains("List")) {
+                        currentWaystoneList.set(value);
+                        System.out.println("[WaystoneInjector] Found waystone list widget via field scan: " + value.getClass().getName());
+                        return;
+                    }
+                } catch (Exception ignored) {
+                    // Continue scanning
+                }
+            }
+
+            // Fallback: scan screen children for any list-like widget
+            try {
+                for (Object child : screen.children()) {
+                    if (child == null) continue;
+                    String simpleName = child.getClass().getSimpleName();
+                    if (simpleName.contains("WaystoneList") || simpleName.contains("SelectionList") || simpleName.contains("List")) {
+                        currentWaystoneList.set(child);
+                        System.out.println("[WaystoneInjector] Found waystone list widget via children(): " + child.getClass().getName());
+                        return;
+                    }
+                }
+            } catch (Exception ignored) {
+                // children() might not be accessible in some edge cases
             }
         } catch (Exception e) {
             System.out.println("[WaystoneInjector] Could not find waystone list: " + e.getMessage());
@@ -713,12 +746,25 @@ public class ClientEvents {
         
         try {
             // Get the waystone entries from the list
-            Field childrenField = findField(waystoneList.getClass(), "children", "entries");
-            if (childrenField != null) {
-                childrenField.setAccessible(true);
-                Object children = childrenField.get(waystoneList);
+            Object children = null;
+
+            // Prefer a children() method if present (some versions store entries behind a method, not a field)
+            try {
+                Method childrenMethod = waystoneList.getClass().getMethod("children");
+                children = childrenMethod.invoke(waystoneList);
+            } catch (Exception ignored) {
+                // Fall back to field access below
+            }
+
+            if (children == null) {
+                Field childrenField = findField(waystoneList.getClass(), "children", "entries");
+                if (childrenField != null) {
+                    childrenField.setAccessible(true);
+                    children = childrenField.get(waystoneList);
+                }
+            }
                 
-                if (children instanceof List) {
+            if (children instanceof List) {
                     @SuppressWarnings("unchecked")
                     List<Object> entries = (List<Object>) children;
                     
@@ -775,7 +821,6 @@ public class ClientEvents {
                             }
                         }
                     }
-                }
             }
             
             // Render colored overlays on custom server transfer buttons
