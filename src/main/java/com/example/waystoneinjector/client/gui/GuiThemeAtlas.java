@@ -39,8 +39,19 @@ public final class GuiThemeAtlas {
 
     public record Sprite(ResourceLocation texture, int textureW, int textureH, int u, int v, int w, int h) {}
 
+            private static final @Nonnull ResourceLocation WAYSTONES_WARP_PLATE_MENU_BG = new ResourceLocation(
+            "waystones",
+            "textures/gui/menu/warp_plate.png"
+        );
+
     public static Sprite background(String type) {
         String resolvedType = normalizeType(type);
+
+        // Special-case: allow overriding Waystones' warp plate menu background directly.
+        // This makes edits under assets/waystones/... visible without requiring atlas surgery.
+        if ("warp_plate".equals(resolvedType) && resourceExists(WAYSTONES_WARP_PLATE_MENU_BG)) {
+            return new Sprite(WAYSTONES_WARP_PLATE_MENU_BG, 256, 256, 0, 0, 256, 256);
+        }
 
         ResourceLocation atlas = atlasTextureOrRegular(resolvedType);
         return new Sprite(atlas, ATLAS_W, ATLAS_H, BG_U, BG_V, BG_W, BG_H);
