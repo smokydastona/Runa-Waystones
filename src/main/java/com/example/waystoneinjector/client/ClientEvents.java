@@ -98,7 +98,7 @@ public class ClientEvents {
             return cached;
         }
 
-        ResourceLocation candidate = new ResourceLocation("waystoneinjector", "textures/gui/portal_animation_" + waystoneType + ".png");
+        ResourceLocation candidate = new ResourceLocation("waystoneinjector", "textures/gui/waystone_portals/portal_animation_" + waystoneType + ".png");
         ResourceLocation resolved;
         try {
             resolved = Minecraft.getInstance().getResourceManager().getResource(candidate).isPresent() ? candidate : PORTAL_ANIMATION;
