@@ -24,7 +24,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("null")
@@ -79,6 +81,34 @@ public class ClientEvents {
     // Animated portal background for waystone GUIs
     private static final ResourceLocation PORTAL_ANIMATION = new ResourceLocation("waystoneinjector", "textures/gui/portal_animation.png");
     private static final ResourceLocation PORTSTONE_PORTAL = new ResourceLocation("waystoneinjector", "textures/gui/portstone_portal.png");
+
+    private static final Map<String, ResourceLocation> PORTAL_BACKGROUND_CACHE = new HashMap<>();
+
+    private static ResourceLocation getPortalBackgroundForType(String waystoneType) {
+        if (waystoneType == null || waystoneType.isBlank()) {
+            waystoneType = "regular";
+        }
+
+        if (waystoneType.equals("portstone")) {
+            return PORTSTONE_PORTAL;
+        }
+
+        ResourceLocation cached = PORTAL_BACKGROUND_CACHE.get(waystoneType);
+        if (cached != null) {
+            return cached;
+        }
+
+        ResourceLocation candidate = new ResourceLocation("waystoneinjector", "textures/gui/portal_animation_" + waystoneType + ".png");
+        ResourceLocation resolved;
+        try {
+            resolved = Minecraft.getInstance().getResourceManager().getResource(candidate).isPresent() ? candidate : PORTAL_ANIMATION;
+        } catch (Exception e) {
+            resolved = PORTAL_ANIMATION;
+        }
+
+        PORTAL_BACKGROUND_CACHE.put(waystoneType, resolved);
+        return resolved;
+    }
     
     // Sharestone portal backgrounds (animated, color-specific)
     private static final ResourceLocation SHARESTONE_PORTAL_BLACK = new ResourceLocation("waystoneinjector", "textures/gui/sharestone_portals/black.png");
@@ -633,12 +663,9 @@ public class ClientEvents {
         
         // For all waystones (except sharestones), render animated portal background first
         if (!waystoneType.equals("sharestone")) {
-            // Render appropriate portal animation based on type
-            if (waystoneType.equals("portstone")) {
-                graphics.blit(PORTSTONE_PORTAL, x, y, 0, 0, 256, 256, 256, 256);
-            } else {
-                graphics.blit(PORTAL_ANIMATION, x, y, 0, 0, 256, 256, 256, 256);
-            }
+            // Render appropriate portal animation based on type (fallback to default)
+            ResourceLocation portalBackground = getPortalBackgroundForType(waystoneType);
+            graphics.blit(portalBackground, x, y, 0, 0, 256, 256, 256, 256);
             
             // Add mystical portal overlay for extra movement
             int randomFrame = (int)((System.currentTimeMillis() / 100) % 26);
