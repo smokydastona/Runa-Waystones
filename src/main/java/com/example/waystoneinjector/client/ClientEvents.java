@@ -245,6 +245,16 @@ public class ClientEvents {
             if (currentWaystoneType.get().equals("sharestone")) {
                 System.out.println("[WaystoneInjector] ✓ Sharestone color: " + currentSharestoneColor.get());
             }
+
+            // Warp plate menus should remain vanilla: no portals, overlays, buttons, or other enhancements.
+            // The only intended change is the Waystones texture override under assets/waystones/...
+            if ("warp_plate".equals(currentWaystoneType.get())) {
+                System.out.println("[WaystoneInjector] Warp plate menu detected - skipping all enhancements (vanilla Waystones screen)");
+                currentWaystoneScreen.set(null);
+                currentWaystoneList.set(null);
+                currentSearchBox.set(null);
+                return;
+            }
             
             // Store screen reference
             currentWaystoneScreen.set(screen);
@@ -660,6 +670,10 @@ public class ClientEvents {
     public static void onRenderBackground(ScreenEvent.BackgroundRendered event) {
         Screen screen = currentWaystoneScreen.get();
         if (screen == null || event.getScreen() != screen) return;
+
+        if ("warp_plate".equals(currentWaystoneType.get())) {
+            return;
+        }
         
         String waystoneType = currentWaystoneType.get();
         GuiThemeAtlas.Sprite bgSprite = GuiThemeAtlas.background(waystoneType);
@@ -722,6 +736,10 @@ public class ClientEvents {
     public static void onRenderWaystoneList(ScreenEvent.Render.Post event) {
         Screen screen = currentWaystoneScreen.get();
         if (screen == null || event.getScreen() != screen) return;
+
+        if ("warp_plate".equals(currentWaystoneType.get())) {
+            return;
+        }
         
         Object waystoneList = currentWaystoneList.get();
         if (waystoneList == null) return;
