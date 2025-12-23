@@ -10,8 +10,8 @@ group = 'com.example'
 // Versioning policy:
 // - Version format: 3.0.{git-commit-count}
 // - Patch increments on every commit.
-def VERSION_PREFIX = '3.0'
 def getVersionFromGit() {
+    def versionPrefix = '3.0'
     try {
         def pb = new ProcessBuilder('git', 'rev-list', '--count', 'HEAD')
         pb.directory(project.rootDir)
@@ -21,13 +21,13 @@ def getVersionFromGit() {
         proc.waitFor()
         if (proc.exitValue() == 0) {
             def commitCount = Integer.parseInt(output)
-            return "${VERSION_PREFIX}.${commitCount}"
+            return "${versionPrefix}.${commitCount}"
         }
         println "git rev-list failed (${proc.exitValue()}): ${output}"
     } catch (Exception e) {
         println "Git not available, using fallback version (${e.class.simpleName})"
     }
-    return "${VERSION_PREFIX}.0"
+    return "${versionPrefix}.0"
 }
 
 version = getVersionFromGit()
