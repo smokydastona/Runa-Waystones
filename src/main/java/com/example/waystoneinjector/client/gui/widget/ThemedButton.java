@@ -1,5 +1,6 @@
 package com.example.waystoneinjector.client.gui.widget;
 
+import com.example.waystoneinjector.client.gui.GuiThemeAtlas;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
@@ -365,32 +366,20 @@ public class ThemedButton extends Button {
     }
     
     private void renderThemedBackground(GuiGraphics graphics) {
-        // Get the appropriate texture based on waystone type
-        ResourceLocation texture = getBackgroundTexture();
+        GuiThemeAtlas.Sprite sprite = GuiThemeAtlas.button(waystoneTypeSupplier.get());
+        if (sprite == null) return;
         
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
 
-        // Render the full 64x32 texture scaled to the widget size (avoid cropping).
-        graphics.blit(texture,
+        // Render the full button region scaled to the widget size.
+        graphics.blit(sprite.texture(),
             getX(), getY(),
             width, height,
-            0.0F, 0.0F,
-            64, 32,
-            64, 32);
-    }
-    
-    private ResourceLocation getBackgroundTexture() {
-        // Pattern: waystoneinjector:textures/gui/buttons/<type>.png
-        // Examples: regular.png, mossy.png, sharestone.png, etc.
-        
-        // Get current waystone type dynamically
-        String currentType = waystoneTypeSupplier.get();
-        
-        String filename = String.format("textures/gui/buttons/%s.png", currentType);
-        
-        return new ResourceLocation("waystoneinjector", filename);
+            (float) sprite.u(), (float) sprite.v(),
+            sprite.w(), sprite.h(),
+            sprite.textureW(), sprite.textureH());
     }
 }

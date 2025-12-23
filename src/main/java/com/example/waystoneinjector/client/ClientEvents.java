@@ -1,5 +1,6 @@
 package com.example.waystoneinjector.client;
 
+import com.example.waystoneinjector.client.gui.GuiThemeAtlas;
 import com.example.waystoneinjector.client.gui.widget.ThemedButton;
 import com.example.waystoneinjector.config.WaystoneConfig;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -687,10 +688,9 @@ public class ClientEvents {
         Screen screen = currentWaystoneScreen.get();
         if (screen == null || event.getScreen() != screen) return;
         
-        // Get the appropriate texture based on waystone type
         String waystoneType = currentWaystoneType.get();
-        ResourceLocation texture = getTextureForType(waystoneType);
-        System.out.println("[WaystoneInjector] Rendering background - Type: " + waystoneType + ", Texture: " + texture);
+        GuiThemeAtlas.Sprite bgSprite = GuiThemeAtlas.background(waystoneType);
+        System.out.println("[WaystoneInjector] Rendering background - Type: " + waystoneType + ", Texture: " + (bgSprite == null ? null : bgSprite.texture()));
         
         GuiGraphics graphics = event.getGuiGraphics();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -733,12 +733,20 @@ public class ClientEvents {
             graphics.blit(MYSTICAL_PORTALS[randomFrame], x, y, 0, 0, 256, 256, 256, 256);
             
             // Render sharestone.png on top
-            graphics.blit(TEXTURE_SHARESTONE, x, y, 0, 0, 256, 256, 256, 256);
+            // Prefer atlas background for sharestone if available.
+            GuiThemeAtlas.Sprite shareBg = GuiThemeAtlas.background("sharestone");
+            if (shareBg != null) {
+                graphics.blit(shareBg.texture(), x, y, 256, 256, (float) shareBg.u(), (float) shareBg.v(), shareBg.w(), shareBg.h(), shareBg.textureW(), shareBg.textureH());
+            } else {
+                graphics.blit(TEXTURE_SHARESTONE, x, y, 0, 0, 256, 256, 256, 256);
+            }
             
             System.out.println("[WaystoneInjector] Sharestone rendering complete");
         } else {
             // For regular waystones, render the main texture on top of portal animation
-            graphics.blit(texture, x, y, 0, 0, 256, 256, 256, 256);
+            if (bgSprite != null) {
+                graphics.blit(bgSprite.texture(), x, y, 256, 256, (float) bgSprite.u(), (float) bgSprite.v(), bgSprite.w(), bgSprite.h(), bgSprite.textureW(), bgSprite.textureH());
+            }
         }
         
         RenderSystem.disableBlend();
@@ -818,14 +826,19 @@ public class ClientEvents {
                                                 int entryY = listY + (i * 36); // Approximate entry height
                                                 
                                                 // Render waystone-type overlay texture based on THIS waystone's type
-                                                ResourceLocation overlayTexture = getOverlayTextureForType(type);
-                                                System.out.println("[WaystoneInjector] Rendering overlay at X=" + listX + ", Y=" + entryY + ", texture=" + overlayTexture);
+                                                GuiThemeAtlas.Sprite overlaySprite = GuiThemeAtlas.overlay(type);
+                                                System.out.println("[WaystoneInjector] Rendering overlay at X=" + listX + ", Y=" + entryY + ", texture=" + (overlaySprite == null ? null : overlaySprite.texture()));
                                                 
-                                                if (overlayTexture != null) {
+                                                if (overlaySprite != null) {
                                                     RenderSystem.enableBlend();
                                                     RenderSystem.defaultBlendFunc();
                                                     RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                                                    graphics.blit(overlayTexture, listX, entryY, 0, 0, 220, 36, 220, 36);
+                                                    graphics.blit(overlaySprite.texture(),
+                                                        listX, entryY,
+                                                        overlaySprite.w(), overlaySprite.h(),
+                                                        (float) overlaySprite.u(), (float) overlaySprite.v(),
+                                                        overlaySprite.w(), overlaySprite.h(),
+                                                        overlaySprite.textureW(), overlaySprite.textureH());
                                                 }
                                             }
                                         }
