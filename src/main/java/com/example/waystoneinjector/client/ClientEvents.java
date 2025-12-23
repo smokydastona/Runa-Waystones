@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("null")
@@ -40,6 +41,7 @@ public class ClientEvents {
     private static final AtomicReference<Screen> currentWaystoneScreen = new AtomicReference<>(null);
     private static final AtomicReference<Object> currentWaystoneList = new AtomicReference<>(null);
     private static final AtomicReference<String> currentWaystoneType = new AtomicReference<>("regular");
+    private static final AtomicLong lastWaystoneBlockClickMs = new AtomicLong(0L);
     
     // Custom GUI texture locations - Waystone Blocks
     private static final ResourceLocation TEXTURE_REGULAR = new ResourceLocation("waystoneinjector", "textures/gui/waystone_regular.png");
@@ -134,6 +136,10 @@ public class ClientEvents {
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!event.getLevel().isClientSide()) return;
+
+        // Mark that we're opening the GUI via an actual waystone block interaction.
+        // This prevents held teleport items (e.g., warp scroll) from overriding the per-waystone theme.
+        lastWaystoneBlockClickMs.set(System.currentTimeMillis());
         
         BlockPos pos = event.getPos();
         Level level = event.getLevel();
@@ -245,8 +251,15 @@ public class ClientEvents {
                 System.out.println("[WaystoneInjector] Set type to sharestone based on screen class");
             }
             
-            // Check if player is holding a teleport item
-            detectTeleportItem();
+            // Check if player is holding a teleport item.
+            // If the GUI was opened by right-clicking a waystone block, don't let the held item override
+            // the per-waystone theme (otherwise everything becomes warp_scroll, etc.).
+            long msSinceBlockClick = System.currentTimeMillis() - lastWaystoneBlockClickMs.get();
+            if (msSinceBlockClick > 1500L) {
+                detectTeleportItem();
+            } else {
+                System.out.println("[WaystoneInjector] Skipping teleport-item theme override (opened via block click, " + msSinceBlockClick + "ms ago)");
+            }
             
             // Don't reset if we already detected type from right-click
             String preClickType = currentWaystoneType.get();
