@@ -353,7 +353,8 @@ public class ThemedButton extends Button {
             int iconX = getX() + (width - iconSize) / 2;
             int iconY = getY() + (height - iconSize) / 2;
 
-            graphics.blit(serverIcon, iconX, iconY, 0, 0, iconSize, iconSize, 64, 64);
+            // Scale the full 64x64 favicon to our iconSize (avoid cropping).
+            graphics.blit(serverIcon, iconX, iconY, iconSize, iconSize, 0.0F, 0.0F, 64, 64, 64, 64);
         } catch (Exception e) {
             if (!loggedServerIconRenderFailure) {
                 loggedServerIconRenderFailure = true;
@@ -371,13 +372,14 @@ public class ThemedButton extends Button {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
-        
-        // Render the background texture (now 64x32 instead of 64x96)
-        graphics.blit(texture, 
-            getX(), getY(),     // Screen position
-            0, 0,               // Texture UV start (always 0,0 since each file is one button)
-            width, height,      // Size to render
-            64, 32);            // Total texture size (64 wide, 32 tall)
+
+        // Render the full 64x32 texture scaled to the widget size (avoid cropping).
+        graphics.blit(texture,
+            getX(), getY(),
+            width, height,
+            0.0F, 0.0F,
+            64, 32,
+            64, 32);
     }
     
     private ResourceLocation getBackgroundTexture() {
