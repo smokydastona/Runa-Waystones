@@ -3,6 +3,8 @@ package com.example.waystoneinjector.client.gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 
+import javax.annotation.Nonnull;
+
 /**
  * Atlas-backed texture lookup for the themed Waystones GUIs.
  *
@@ -40,57 +42,22 @@ public final class GuiThemeAtlas {
     public static Sprite background(String type) {
         String resolvedType = normalizeType(type);
 
-        // Prefer atlas if present
-        ResourceLocation atlas = atlasTexture(resolvedType);
-        if (resourceExists(atlas)) {
-            return new Sprite(atlas, ATLAS_W, ATLAS_H, BG_U, BG_V, BG_W, BG_H);
-        }
-
-        // Legacy background PNGs
-        ResourceLocation legacy = legacyBackgroundTexture(resolvedType);
-        if (resourceExists(legacy)) {
-            return new Sprite(legacy, 256, 256, 0, 0, 256, 256);
-        }
-
-        // Final fallback
-        ResourceLocation fallback = legacyBackgroundTexture("regular");
-        return new Sprite(fallback, 256, 256, 0, 0, 256, 256);
+        ResourceLocation atlas = atlasTextureOrRegular(resolvedType);
+        return new Sprite(atlas, ATLAS_W, ATLAS_H, BG_U, BG_V, BG_W, BG_H);
     }
 
     public static Sprite overlay(String type) {
         String resolvedType = normalizeType(type);
 
-        ResourceLocation atlas = atlasTexture(resolvedType);
-        if (resourceExists(atlas)) {
-            return new Sprite(atlas, ATLAS_W, ATLAS_H, OVERLAY_U, OVERLAY_V, OVERLAY_W, OVERLAY_H);
-        }
-
-        ResourceLocation legacy = legacyOverlayTexture(resolvedType);
-        if (resourceExists(legacy)) {
-            return new Sprite(legacy, OVERLAY_W, OVERLAY_H, 0, 0, OVERLAY_W, OVERLAY_H);
-        }
-
-        // Some types never had overlays; return null by signaling missing texture via a null ResourceLocation.
-        // Callers should handle null.
-        return null;
+        ResourceLocation atlas = atlasTextureOrRegular(resolvedType);
+        return new Sprite(atlas, ATLAS_W, ATLAS_H, OVERLAY_U, OVERLAY_V, OVERLAY_W, OVERLAY_H);
     }
 
     public static Sprite button(String type) {
         String resolvedType = normalizeType(type);
 
-        ResourceLocation atlas = atlasTexture(resolvedType);
-        if (resourceExists(atlas)) {
-            return new Sprite(atlas, ATLAS_W, ATLAS_H, BUTTON_U, BUTTON_V, BUTTON_W, BUTTON_H);
-        }
-
-        ResourceLocation legacy = legacyButtonTexture(resolvedType);
-        if (resourceExists(legacy)) {
-            return new Sprite(legacy, BUTTON_W, BUTTON_H, 0, 0, BUTTON_W, BUTTON_H);
-        }
-
-        // Fallback to regular button
-        ResourceLocation fallback = legacyButtonTexture("regular");
-        return new Sprite(fallback, BUTTON_W, BUTTON_H, 0, 0, BUTTON_W, BUTTON_H);
+        ResourceLocation atlas = atlasTextureOrRegular(resolvedType);
+        return new Sprite(atlas, ATLAS_W, ATLAS_H, BUTTON_U, BUTTON_V, BUTTON_W, BUTTON_H);
     }
 
     private static String normalizeType(String type) {
@@ -98,49 +65,15 @@ public final class GuiThemeAtlas {
         return type;
     }
 
-    private static ResourceLocation atlasTexture(String type) {
-        return new ResourceLocation("waystoneinjector", "textures/gui/atlases/menu_" + type + ".png");
+    private static ResourceLocation atlasTextureOrRegular(String type) {
+        ResourceLocation candidate = new ResourceLocation("waystoneinjector", "textures/gui/atlases/menu_" + type + ".png");
+        if (resourceExists(candidate)) {
+            return candidate;
+        }
+        return new ResourceLocation("waystoneinjector", "textures/gui/atlases/menu_regular.png");
     }
 
-    private static ResourceLocation legacyBackgroundTexture(String type) {
-        return switch (type) {
-            case "sharestone" -> new ResourceLocation("waystoneinjector", "textures/gui/sharestone.png");
-            case "mossy" -> new ResourceLocation("waystoneinjector", "textures/gui/waystone_mossy.png");
-            case "blackstone" -> new ResourceLocation("waystoneinjector", "textures/gui/waystone_blackstone.png");
-            case "deepslate" -> new ResourceLocation("waystoneinjector", "textures/gui/waystone_deepslate.png");
-            case "endstone" -> new ResourceLocation("waystoneinjector", "textures/gui/waystone_endstone.png");
-            case "sandy" -> new ResourceLocation("waystoneinjector", "textures/gui/waystone_sandy.png");
-            case "warp_plate" -> new ResourceLocation("waystoneinjector", "textures/gui/warp_plate.png");
-            case "portstone" -> new ResourceLocation("waystoneinjector", "textures/gui/portstone.png");
-            case "warp_scroll" -> new ResourceLocation("waystoneinjector", "textures/gui/warp_scroll.png");
-            case "bound_scroll" -> new ResourceLocation("waystoneinjector", "textures/gui/bound_scroll.png");
-            case "warp_stone" -> new ResourceLocation("waystoneinjector", "textures/gui/warp_stone.png");
-            case "return_scroll" -> new ResourceLocation("waystoneinjector", "textures/gui/return_scroll.png");
-            default -> new ResourceLocation("waystoneinjector", "textures/gui/waystone_regular.png");
-        };
-    }
-
-    private static ResourceLocation legacyOverlayTexture(String type) {
-        return switch (type) {
-            case "mossy" -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/mossy.png");
-            case "blackstone" -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/blackstone.png");
-            case "deepslate" -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/deepslate.png");
-            case "endstone" -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/endstone.png");
-            case "sandy" -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/sandy.png");
-            case "sharestone" -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/sharestone.png");
-            case "warp_scroll" -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/warp_scroll.png");
-            case "warp_stone" -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/warp_stone.png");
-            case "portstone" -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/portstone.png");
-            case "regular" -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/regular.png");
-            default -> new ResourceLocation("waystoneinjector", "textures/gui/overlays/regular.png");
-        };
-    }
-
-    private static ResourceLocation legacyButtonTexture(String type) {
-        return new ResourceLocation("waystoneinjector", "textures/gui/buttons/" + type + ".png");
-    }
-
-    private static boolean resourceExists(ResourceLocation location) {
+    private static boolean resourceExists(@Nonnull ResourceLocation location) {
         try {
             return Minecraft.getInstance().getResourceManager().getResource(location).isPresent();
         } catch (Exception ignored) {

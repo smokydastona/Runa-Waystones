@@ -44,29 +44,6 @@ public class ClientEvents {
     private static final AtomicReference<String> currentWaystoneType = new AtomicReference<>("regular");
     private static final AtomicLong lastWaystoneBlockClickMs = new AtomicLong(0L);
     
-    // Custom GUI texture locations - Waystone Blocks
-    private static final ResourceLocation TEXTURE_REGULAR = new ResourceLocation("waystoneinjector", "textures/gui/waystone_regular.png");
-    private static final ResourceLocation TEXTURE_MOSSY = new ResourceLocation("waystoneinjector", "textures/gui/waystone_mossy.png");
-    private static final ResourceLocation TEXTURE_BLACKSTONE = new ResourceLocation("waystoneinjector", "textures/gui/waystone_blackstone.png");
-    private static final ResourceLocation TEXTURE_DEEPSLATE = new ResourceLocation("waystoneinjector", "textures/gui/waystone_deepslate.png");
-    private static final ResourceLocation TEXTURE_ENDSTONE = new ResourceLocation("waystoneinjector", "textures/gui/waystone_endstone.png");
-    private static final ResourceLocation TEXTURE_SANDY = new ResourceLocation("waystoneinjector", "textures/gui/waystone_sandy.png");
-    private static final ResourceLocation TEXTURE_SHARESTONE = new ResourceLocation("waystoneinjector", "textures/gui/sharestone.png");
-    private static final ResourceLocation TEXTURE_WARP_PLATE = new ResourceLocation("waystoneinjector", "textures/gui/warp_plate.png");
-    private static final ResourceLocation TEXTURE_PORTSTONE = new ResourceLocation("waystoneinjector", "textures/gui/portstone.png");
-    
-    // Waystone list entry overlays (220x36 for each waystone button in the list)
-    private static final ResourceLocation OVERLAY_REGULAR = new ResourceLocation("waystoneinjector", "textures/gui/overlays/regular.png");
-    private static final ResourceLocation OVERLAY_MOSSY = new ResourceLocation("waystoneinjector", "textures/gui/overlays/mossy.png");
-    private static final ResourceLocation OVERLAY_BLACKSTONE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/blackstone.png");
-    private static final ResourceLocation OVERLAY_DEEPSLATE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/deepslate.png");
-    private static final ResourceLocation OVERLAY_ENDSTONE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/endstone.png");
-    private static final ResourceLocation OVERLAY_SANDY = new ResourceLocation("waystoneinjector", "textures/gui/overlays/sandy.png");
-    private static final ResourceLocation OVERLAY_SHARESTONE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/sharestone.png");
-    private static final ResourceLocation OVERLAY_WARP_SCROLL = new ResourceLocation("waystoneinjector", "textures/gui/overlays/warp_scroll.png");
-    private static final ResourceLocation OVERLAY_WARP_STONE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/warp_stone.png");
-    private static final ResourceLocation OVERLAY_PORTSTONE = new ResourceLocation("waystoneinjector", "textures/gui/overlays/portstone.png");
-    
     // Mystical portal overlay textures (26 frames for random selection)
     private static final ResourceLocation[] MYSTICAL_PORTALS = new ResourceLocation[26];
     static {
@@ -75,11 +52,7 @@ public class ClientEvents {
         }
     }
     
-    // Custom GUI textures - Teleportation Items
-    private static final ResourceLocation TEXTURE_WARP_SCROLL = new ResourceLocation("waystoneinjector", "textures/gui/warp_scroll.png");
-    private static final ResourceLocation TEXTURE_BOUND_SCROLL = new ResourceLocation("waystoneinjector", "textures/gui/bound_scroll.png");
-    private static final ResourceLocation TEXTURE_WARP_STONE = new ResourceLocation("waystoneinjector", "textures/gui/warp_stone.png");
-    private static final ResourceLocation TEXTURE_RETURN_SCROLL = new ResourceLocation("waystoneinjector", "textures/gui/return_scroll.png");
+
     
     // Animated portal background for waystone GUIs
     private static final ResourceLocation PORTAL_ANIMATION = new ResourceLocation("waystoneinjector", "textures/gui/portal_animation.png");
@@ -690,7 +663,7 @@ public class ClientEvents {
         
         String waystoneType = currentWaystoneType.get();
         GuiThemeAtlas.Sprite bgSprite = GuiThemeAtlas.background(waystoneType);
-        System.out.println("[WaystoneInjector] Rendering background - Type: " + waystoneType + ", Texture: " + (bgSprite == null ? null : bgSprite.texture()));
+        System.out.println("[WaystoneInjector] Rendering background - Type: " + waystoneType + ", Texture: " + bgSprite.texture());
         
         GuiGraphics graphics = event.getGuiGraphics();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -732,21 +705,14 @@ public class ClientEvents {
             int randomFrame = (int)((System.currentTimeMillis() / 100) % 26);
             graphics.blit(MYSTICAL_PORTALS[randomFrame], x, y, 0, 0, 256, 256, 256, 256);
             
-            // Render sharestone.png on top
-            // Prefer atlas background for sharestone if available.
+            // Render sharestone atlas background on top
             GuiThemeAtlas.Sprite shareBg = GuiThemeAtlas.background("sharestone");
-            if (shareBg != null) {
-                graphics.blit(shareBg.texture(), x, y, 256, 256, (float) shareBg.u(), (float) shareBg.v(), shareBg.w(), shareBg.h(), shareBg.textureW(), shareBg.textureH());
-            } else {
-                graphics.blit(TEXTURE_SHARESTONE, x, y, 0, 0, 256, 256, 256, 256);
-            }
+            graphics.blit(shareBg.texture(), x, y, 256, 256, (float) shareBg.u(), (float) shareBg.v(), shareBg.w(), shareBg.h(), shareBg.textureW(), shareBg.textureH());
             
             System.out.println("[WaystoneInjector] Sharestone rendering complete");
         } else {
             // For regular waystones, render the main texture on top of portal animation
-            if (bgSprite != null) {
-                graphics.blit(bgSprite.texture(), x, y, 256, 256, (float) bgSprite.u(), (float) bgSprite.v(), bgSprite.w(), bgSprite.h(), bgSprite.textureW(), bgSprite.textureH());
-            }
+            graphics.blit(bgSprite.texture(), x, y, 256, 256, (float) bgSprite.u(), (float) bgSprite.v(), bgSprite.w(), bgSprite.h(), bgSprite.textureW(), bgSprite.textureH());
         }
         
         RenderSystem.disableBlend();
@@ -894,24 +860,6 @@ public class ClientEvents {
         }
     }
     
-    private static ResourceLocation getTextureForType(String type) {
-        return switch (type) {
-            case "sharestone" -> TEXTURE_SHARESTONE;
-            case "mossy" -> TEXTURE_MOSSY;
-            case "blackstone" -> TEXTURE_BLACKSTONE;
-            case "deepslate" -> TEXTURE_DEEPSLATE;
-            case "endstone" -> TEXTURE_ENDSTONE;
-            case "sandy" -> TEXTURE_SANDY;
-            case "warp_plate" -> TEXTURE_WARP_PLATE;
-            case "portstone" -> TEXTURE_PORTSTONE;
-            case "warp_scroll" -> TEXTURE_WARP_SCROLL;
-            case "bound_scroll" -> TEXTURE_BOUND_SCROLL;
-            case "warp_stone" -> TEXTURE_WARP_STONE;
-            case "return_scroll" -> TEXTURE_RETURN_SCROLL;
-            default -> TEXTURE_REGULAR;
-        };
-    }
-    
     private static void detectTeleportItem() {
         try {
             net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
@@ -979,22 +927,6 @@ public class ClientEvents {
             case "white" -> SHARESTONE_PORTAL_WHITE;
             case "yellow" -> SHARESTONE_PORTAL_YELLOW;
             default -> SHARESTONE_PORTAL_PURPLE; // Default to purple
-        };
-    }
-    
-    private static ResourceLocation getOverlayTextureForType(String type) {
-        return switch (type) {
-            case "regular" -> OVERLAY_REGULAR;
-            case "mossy" -> OVERLAY_MOSSY;
-            case "blackstone" -> OVERLAY_BLACKSTONE;
-            case "deepslate" -> OVERLAY_DEEPSLATE;
-            case "endstone" -> OVERLAY_ENDSTONE;
-            case "sandy" -> OVERLAY_SANDY;
-            case "sharestone" -> OVERLAY_SHARESTONE;
-            case "warp_scroll" -> OVERLAY_WARP_SCROLL;
-            case "warp_stone" -> OVERLAY_WARP_STONE;
-            case "portstone" -> OVERLAY_PORTSTONE;
-            default -> OVERLAY_REGULAR;
         };
     }
     
