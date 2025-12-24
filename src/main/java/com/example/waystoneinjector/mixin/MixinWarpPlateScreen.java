@@ -17,16 +17,23 @@ import javax.annotation.Nonnull;
 @Mixin(targets = "net.blay09.mods.waystones.client.gui.screen.WarpPlateScreen")
 public abstract class MixinWarpPlateScreen {
 
-        private static final @Nonnull ResourceLocation WARP_PLATE_BG = new ResourceLocation(
-            "waystoneinjector",
-            "textures/gui/menu/warp_plate.png"
+    private static final @Nonnull ResourceLocation WARP_PLATE_BG = new ResourceLocation(
+        "waystoneinjector", "textures/gui/menu/warp_plate.png"
     );
 
-    @Inject(method = "renderBg(Lnet/minecraft/client/gui/GuiGraphics;FII)V", at = @At("TAIL"))
+    @Inject(
+        method = {
+            // Dev (named) environment
+            "renderBg(Lnet/minecraft/client/gui/GuiGraphics;FII)V",
+            // Runtime (obfuscated/official) environment
+            "m_7286_(Lnet/minecraft/client/gui/GuiGraphics;FII)V"
+        },
+        at = @At("TAIL"),
+        require = 0
+    )
     private void waystoneinjector_renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY, CallbackInfo ci) {
-        // Draw our background after the original background, but before slots/labels render.
-        // We avoid relying on container-screen fields (leftPos/topPos/imageWidth/height) because WarpPlateScreen
-        // is not guaranteed to extend AbstractContainerScreen.
+    // Draw our background after the original background.
+    // We avoid relying on container-screen fields because, without a refmap, field names are not stable.
         int screenW = Minecraft.getInstance().getWindow().getGuiScaledWidth();
         int screenH = Minecraft.getInstance().getWindow().getGuiScaledHeight();
 
