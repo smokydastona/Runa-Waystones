@@ -379,6 +379,9 @@ public class ThemedButton extends Button {
         // Render the full button region scaled to the widget size.
         // If the button is placed on the right side, mirror the atlas region horizontally so the design faces inward.
         if (mirrorThemedBackground) {
+            // Negative scaling flips winding; some render states can cull the quad.
+            // Disable culling for this draw so the mirrored button always renders.
+            RenderSystem.disableCull();
             graphics.pose().pushPose();
             graphics.pose().translate(getX() + (double) width, getY(), 0.0D);
             graphics.pose().scale(-1.0F, 1.0F, 1.0F);
@@ -389,6 +392,7 @@ public class ThemedButton extends Button {
                     sprite.w(), sprite.h(),
                     sprite.textureW(), sprite.textureH());
             graphics.pose().popPose();
+            RenderSystem.enableCull();
         } else {
             graphics.blit(sprite.texture(),
                     getX(), getY(),
