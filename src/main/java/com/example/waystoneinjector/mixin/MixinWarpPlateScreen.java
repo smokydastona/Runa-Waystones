@@ -1,9 +1,9 @@
 package com.example.waystoneinjector.mixin;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -22,14 +22,19 @@ public abstract class MixinWarpPlateScreen {
             "textures/gui/menu/warp_plate.png"
     );
 
-    @Shadow protected int leftPos;
-    @Shadow protected int topPos;
-    @Shadow protected int imageWidth;
-    @Shadow protected int imageHeight;
-
     @Inject(method = "renderBg(Lnet/minecraft/client/gui/GuiGraphics;FII)V", at = @At("TAIL"))
     private void waystoneinjector_renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY, CallbackInfo ci) {
         // Draw our background after the original background, but before slots/labels render.
-        guiGraphics.blit(WARP_PLATE_BG, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        // We avoid relying on container-screen fields (leftPos/topPos/imageWidth/height) because WarpPlateScreen
+        // is not guaranteed to extend AbstractContainerScreen.
+        int screenW = Minecraft.getInstance().getWindow().getGuiScaledWidth();
+        int screenH = Minecraft.getInstance().getWindow().getGuiScaledHeight();
+
+        int texW = 256;
+        int texH = 256;
+        int x = (screenW - texW) / 2;
+        int y = (screenH - texH) / 2;
+
+        guiGraphics.blit(WARP_PLATE_BG, x, y, 0, 0, texW, texH, texW, texH);
     }
 }
