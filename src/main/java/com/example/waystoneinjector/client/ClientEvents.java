@@ -8,6 +8,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.core.BlockPos;
@@ -1218,6 +1220,27 @@ public class ClientEvents {
     public static void connectToServer(String serverAddress) {
         Minecraft mc = Minecraft.getInstance();
         System.out.println("[WaystoneInjector] Connecting to server");
+
+        if (serverAddress == null || serverAddress.isBlank()) {
+            System.err.println("[WaystoneInjector] connectToServer called with empty serverAddress");
+            return;
+        }
+
+        // IMPORTANT:
+        // If we pass an in-world Waystones GUI as the parent screen to ConnectScreen,
+        // and the connection fails (e.g. getsock), clicking "Back to Server List" will
+        // try to re-open that in-world GUI while no world/player exists, which can crash.
+        // Use a safe menu parent in those cases.
+        Screen parentScreen = mc.screen;
+        boolean inWorld = mc.level != null;
+        if (parentScreen != null) {
+            String parentName = parentScreen.getClass().getName();
+            boolean isWaystonesGui = parentName.startsWith("net.blay09.mods.waystones.client.gui.screen.")
+                    || parentScreen.getClass().getName().equals("com.example.waystoneinjector.client.gui.EnhancedWaystoneSelectionScreen");
+            if (inWorld || isWaystonesGui) {
+                parentScreen = new JoinMultiplayerScreen(new TitleScreen());
+            }
+        }
         
         // Disconnect from current server first
         if (mc.level != null) {
@@ -1225,14 +1248,20 @@ public class ClientEvents {
         }
         
         // Parse server address
-        ServerAddress address = ServerAddress.parseString(serverAddress);
+        final ServerAddress address;
+        try {
+            address = ServerAddress.parseString(serverAddress);
+        } catch (Exception e) {
+            System.err.println("[WaystoneInjector] Failed to parse server address: " + e.getMessage());
+            return;
+        }
         
         // Create ServerData object (1.20.1 API)
         ServerData serverData = new ServerData(serverAddress, serverAddress, false);
         
         // Connect to the server (1.20.1 API)
         net.minecraft.client.gui.screens.ConnectScreen.startConnecting(
-            mc.screen,
+            parentScreen,
             mc,
             address,
             serverData,
