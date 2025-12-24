@@ -40,6 +40,7 @@ public class ThemedButton extends Button {
     
     private final Supplier<String> waystoneTypeSupplier;
     private final String serverAddress;
+    private final boolean mirrorThemedBackground;
     private ResourceLocation serverIcon;
 
     private boolean loggedMissingServerAddress;
@@ -53,6 +54,7 @@ public class ThemedButton extends Button {
         this.waystoneTypeSupplier = waystoneTypeSupplier;
         this.serverAddress = serverAddress;
         this.serverIcon = null;
+        this.mirrorThemedBackground = "right".equalsIgnoreCase(side);
     }
 
     private static String sha1Hex(String value) {
@@ -375,11 +377,25 @@ public class ThemedButton extends Button {
         RenderSystem.enableDepthTest();
 
         // Render the full button region scaled to the widget size.
-        graphics.blit(sprite.texture(),
-            getX(), getY(),
-            width, height,
-            (float) sprite.u(), (float) sprite.v(),
-            sprite.w(), sprite.h(),
-            sprite.textureW(), sprite.textureH());
+        // If the button is placed on the right side, mirror the atlas region horizontally so the design faces inward.
+        if (mirrorThemedBackground) {
+            graphics.pose().pushPose();
+            graphics.pose().translate(getX() + (double) width, getY(), 0.0D);
+            graphics.pose().scale(-1.0F, 1.0F, 1.0F);
+            graphics.blit(sprite.texture(),
+                    0, 0,
+                    width, height,
+                    (float) sprite.u(), (float) sprite.v(),
+                    sprite.w(), sprite.h(),
+                    sprite.textureW(), sprite.textureH());
+            graphics.pose().popPose();
+        } else {
+            graphics.blit(sprite.texture(),
+                    getX(), getY(),
+                    width, height,
+                    (float) sprite.u(), (float) sprite.v(),
+                    sprite.w(), sprite.h(),
+                    sprite.textureW(), sprite.textureH());
+        }
     }
 }
