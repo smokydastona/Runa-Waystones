@@ -80,6 +80,14 @@ minecraft {
     }
 }
 
+    // Package the user's Warp Plate GUI override under our namespace so it can be used reliably at runtime.
+    // (Including assets under another mod's namespace is not guaranteed to be exposed by Forge's mod resource pack.)
+    tasks.named('processResources', ProcessResources).configure {
+        from("src/main/resources/assets/waystones/textures/gui/menu/warp_plate.png") {
+            into("assets/waystoneinjector/textures/gui/menu")
+        }
+    }
+
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
     
