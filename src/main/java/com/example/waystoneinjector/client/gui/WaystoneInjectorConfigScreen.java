@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +35,9 @@ public class WaystoneInjectorConfigScreen extends Screen {
 
     private final Screen parent;
     private final List<Row> rows = new ArrayList<>();
+
+    // Collapsible sections (used to keep the per-button settings from becoming a wall of fields).
+    private final Set<String> collapsedSections = new HashSet<>();
 
     private double scroll;
     private int contentHeight;
@@ -107,7 +111,8 @@ public class WaystoneInjectorConfigScreen extends Screen {
     }
 
     private void addButtonSection(int idx) {
-        addHeader("Button " + idx);
+        String sectionId = "button" + idx;
+        addCollapsibleHeader("Button " + idx, sectionId);
         ButtonSpec spec = ButtonSpec.of(idx);
 
         addBooleanRow("Enabled", spec.enabled.get(), spec.enabled::set);
@@ -132,11 +137,20 @@ public class WaystoneInjectorConfigScreen extends Screen {
         rows.add(Row.header(text));
     }
 
+    private void addCollapsibleHeader(String text, String sectionId) {
+        // Default to expanded for Button 1, collapsed for the rest.
+        // This preserves usability while still keeping every option available.
+        if (sectionId != null && sectionId.startsWith("button") && !sectionId.equals("button1")) {
+            collapsedSections.add(sectionId);
+        }
+        rows.add(Row.collapsibleHeader(text, sectionId));
+    }
+
     private EditBox addStringRow(String label, String initial, java.util.function.Consumer<String> apply, int maxLen) {
         EditBox box = new EditBox(this.font, 0, 0, 220, 18, Component.literal(label));
         box.setMaxLength(maxLen);
         box.setValue(initial == null ? "" : initial);
-        rows.add(Row.withWidget(label, box, () -> apply.accept(box.getValue())));
+        rows.add(Row.withWidget(label, box, () -> apply.accept(box.getValue()), currentSection()));
         this.addRenderableWidget(box);
         return box;
     }
@@ -150,26 +164,37 @@ public class WaystoneInjectorConfigScreen extends Screen {
             int parsed = parseIntClamped(box.getValue(), initial, min, max);
             apply.accept(parsed);
             box.setValue(Integer.toString(parsed));
-        }));
+        }, currentSection()));
         this.addRenderableWidget(box);
     }
 
     private void addBooleanRow(String label, boolean initial, java.util.function.Consumer<Boolean> apply) {
         ToggleButton toggle = new ToggleButton(0, 0, 100, 20, initial);
-        rows.add(Row.withWidget(label, toggle, () -> apply.accept(toggle.value())));
+        rows.add(Row.withWidget(label, toggle, () -> apply.accept(toggle.value()), currentSection()));
         this.addRenderableWidget(toggle);
     }
 
     private void addEnumStringRow(String label, String initial, String[] values, java.util.function.Consumer<String> apply) {
         CycleButton<String> cycle = new CycleButton<>(0, 0, 140, 20, values, initial);
-        rows.add(Row.withWidget(label, cycle, () -> apply.accept(cycle.value())));
+        rows.add(Row.withWidget(label, cycle, () -> apply.accept(cycle.value()), currentSection()));
         this.addRenderableWidget(cycle);
     }
 
     private <T extends Enum<T>> void addEnumRow(String label, T initial, T[] values, java.util.function.Consumer<T> apply) {
         CycleButton<T> cycle = new CycleButton<>(0, 0, 180, 20, values, initial);
-        rows.add(Row.withWidget(label, cycle, () -> apply.accept(cycle.value())));
+        rows.add(Row.withWidget(label, cycle, () -> apply.accept(cycle.value()), currentSection()));
         this.addRenderableWidget(cycle);
+    }
+
+    private String currentSection() {
+        // Most-recent collapsible header is the active section.
+        for (int i = rows.size() - 1; i >= 0; i--) {
+            Row r = rows.get(i);
+            if (r.isSectionHeader && r.sectionId != null) {
+                return r.sectionId;
+            }
+        }
+        return null;
     }
 
     private void onSave() {
@@ -260,6 +285,13 @@ public class WaystoneInjectorConfigScreen extends Screen {
     private void recalcContentHeight() {
         int h = 0;
         for (Row row : rows) {
+            if (row.isHeader) {
+                h += row.height;
+                continue;
+            }
+            if (row.sectionId != null && collapsedSections.contains(row.sectionId)) {
+                continue;
+            }
             h += row.height;
         }
         this.contentHeight = h;
@@ -271,10 +303,53 @@ public class WaystoneInjectorConfigScreen extends Screen {
         int y = TOP - (int) this.scroll;
         for (Row row : rows) {
             row.setY(y);
+
+            boolean layoutVisible = row.isHeader || row.sectionId == null || !collapsedSections.contains(row.sectionId);
+            if (!layoutVisible) {
+                row.setVisible(false);
+                continue;
+            }
+
             boolean visible = y + row.height >= TOP && y <= viewBottom;
             row.setVisible(visible);
             y += row.height;
         }
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // Allow clicking on per-button headers to collapse/expand.
+        int viewBottom = this.height - BOTTOM_PADDING;
+        if (mouseY >= TOP && mouseY <= viewBottom) {
+            int y = TOP - (int) this.scroll;
+            for (Row row : rows) {
+                boolean layoutVisible = row.isHeader || row.sectionId == null || !collapsedSections.contains(row.sectionId);
+
+                if (row.isSectionHeader && row.collapsible && layoutVisible) {
+                    if (mouseY >= y && mouseY <= y + row.height) {
+                        toggleSection(row.sectionId);
+                        return true;
+                    }
+                }
+
+                if (!layoutVisible) {
+                    continue;
+                }
+                y += row.height;
+            }
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    private void toggleSection(String sectionId) {
+        if (sectionId == null) return;
+        if (collapsedSections.contains(sectionId)) {
+            collapsedSections.remove(sectionId);
+        } else {
+            collapsedSections.add(sectionId);
+        }
+        recalcContentHeight();
+        updateWidgetPositions();
     }
 
     @Override
@@ -289,9 +364,21 @@ public class WaystoneInjectorConfigScreen extends Screen {
 
         int y = TOP - (int) this.scroll;
         for (Row row : rows) {
+            boolean layoutVisible = row.isHeader || row.sectionId == null || !collapsedSections.contains(row.sectionId);
+            if (!layoutVisible) {
+                continue;
+            }
+
             if (y + row.height >= TOP && y <= viewBottom) {
                 int color = row.isHeader ? 0xFFD080 : 0xE0E0E0;
-                graphics.drawString(this.font, Component.literal(row.label), labelX, y + (row.isHeader ? 4 : 6), color);
+
+                String label = row.label;
+                if (row.isSectionHeader && row.collapsible && row.sectionId != null) {
+                    boolean collapsed = collapsedSections.contains(row.sectionId);
+                    label = (collapsed ? "[+] " : "[-] ") + label;
+                }
+
+                graphics.drawString(this.font, Component.literal(label), labelX, y + (row.isHeader ? 4 : 6), color);
             }
             y += row.height;
         }
@@ -339,24 +426,43 @@ public class WaystoneInjectorConfigScreen extends Screen {
     private static final class Row {
         final String label;
         final boolean isHeader;
+        final boolean isSectionHeader;
+        final boolean collapsible;
+        final String sectionId;
         final int height;
         final List<net.minecraft.client.gui.components.AbstractWidget> widgets;
         final Runnable apply;
 
-        private Row(String label, boolean isHeader, int height, List<net.minecraft.client.gui.components.AbstractWidget> widgets, Runnable apply) {
+        private Row(
+            String label,
+            boolean isHeader,
+            boolean isSectionHeader,
+            boolean collapsible,
+            String sectionId,
+            int height,
+            List<net.minecraft.client.gui.components.AbstractWidget> widgets,
+            Runnable apply
+        ) {
             this.label = label;
             this.isHeader = isHeader;
+            this.isSectionHeader = isSectionHeader;
+            this.collapsible = collapsible;
+            this.sectionId = sectionId;
             this.height = height;
             this.widgets = widgets;
             this.apply = apply;
         }
 
         static Row header(String label) {
-            return new Row(label, true, HEADER_H, List.of(), () -> {});
+            return new Row(label, true, false, false, null, HEADER_H, List.of(), () -> {});
         }
 
-        static Row withWidget(String label, net.minecraft.client.gui.components.AbstractWidget widget, Runnable apply) {
-            return new Row(label, false, ROW_H, List.of(widget), apply);
+        static Row collapsibleHeader(String label, String sectionId) {
+            return new Row(label, true, true, true, sectionId, HEADER_H, List.of(), () -> {});
+        }
+
+        static Row withWidget(String label, net.minecraft.client.gui.components.AbstractWidget widget, Runnable apply, String sectionId) {
+            return new Row(label, false, false, false, sectionId, ROW_H, List.of(widget), apply);
         }
 
         void setY(int y) {
