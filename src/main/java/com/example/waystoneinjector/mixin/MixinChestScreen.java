@@ -77,7 +77,9 @@ public abstract class MixinChestScreen {
         }
 
         String title = screen.getTitle().getString();
-        if (!"Ze Voidrobe".equals(title) && !"Void Closet".equals(title) && !"Vault".equals(title)) {
+        String normalized = title == null ? "" : title.trim();
+        // Allow suffixes like "+" and other decorations while keeping the match specific.
+        if (!normalized.startsWith("Ze Voidrobe") && !normalized.startsWith("Void Closet") && !normalized.startsWith("Vault")) {
             return;
         }
 
@@ -105,7 +107,20 @@ public abstract class MixinChestScreen {
         int x = (screenW - imageW) / 2;
         int y = (screenH - imageH) / 2;
 
-        guiGraphics.blit(ZE_VOIDROBE_BG, x, y, 0, 0, imageW, imageH, ZE_VOIDROBE_TEX_W, ZE_VOIDROBE_TEX_H);
+        // Draw the full 2x texture scaled down into the vanilla chest GUI area.
+        guiGraphics.blit(
+            ZE_VOIDROBE_BG,
+            x,
+            y,
+            imageW,
+            imageH,
+            0.0F,
+            0.0F,
+            ZE_VOIDROBE_TEX_W,
+            ZE_VOIDROBE_TEX_H,
+            ZE_VOIDROBE_TEX_W,
+            ZE_VOIDROBE_TEX_H
+        );
 
         RenderSystem.disableBlend();
         ci.cancel();
