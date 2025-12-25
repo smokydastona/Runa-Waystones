@@ -60,7 +60,33 @@ public class ClientEvents {
     private static final ResourceLocation PORTAL_ANIMATION = new ResourceLocation("waystoneinjector", "textures/gui/portal_animation.png");
     private static final ResourceLocation PORTSTONE_PORTAL = new ResourceLocation("waystoneinjector", "textures/gui/portstone_portal.png");
 
+    private static final int PORTAL_FRAME_W = 256;
+    private static final int PORTAL_FRAME_H = 256;
+    private static final int PORTAL_SHEET_W = 256;
+    private static final int PORTAL_SHEET_H = 4096;
+    private static final int PORTAL_FRAMES = PORTAL_SHEET_H / PORTAL_FRAME_H;
+
+    private static final int SHARESTONE_FRAME_W = 16;
+    private static final int SHARESTONE_FRAME_H = 16;
+    private static final int SHARESTONE_SHEET_W = 16;
+    private static final int SHARESTONE_SHEET_H = 512;
+    private static final int SHARESTONE_FRAMES = SHARESTONE_SHEET_H / SHARESTONE_FRAME_H;
+
+    private static final long PORTAL_FRAME_TIME_MS = 100L; // matches frametime=2 (approx) at 20 TPS
+
     private static final Map<String, ResourceLocation> PORTAL_BACKGROUND_CACHE = new HashMap<>();
+
+    private static void blitAnimatedPortalSheet(GuiGraphics graphics, ResourceLocation texture, int x, int y) {
+        int frame = (int) ((System.currentTimeMillis() / PORTAL_FRAME_TIME_MS) % PORTAL_FRAMES);
+        int v = frame * PORTAL_FRAME_H;
+        graphics.blit(texture, x, y, 0, 256, 256, 0.0F, (float) v, PORTAL_FRAME_W, PORTAL_FRAME_H, PORTAL_SHEET_W, PORTAL_SHEET_H);
+    }
+
+    private static void blitAnimatedSharestonePortalSheet(GuiGraphics graphics, ResourceLocation texture, int x, int y) {
+        int frame = (int) ((System.currentTimeMillis() / PORTAL_FRAME_TIME_MS) % SHARESTONE_FRAMES);
+        int v = frame * SHARESTONE_FRAME_H;
+        graphics.blit(texture, x, y, 0, 256, 256, 0.0F, (float) v, SHARESTONE_FRAME_W, SHARESTONE_FRAME_H, SHARESTONE_SHEET_W, SHARESTONE_SHEET_H);
+    }
 
     private static ResourceLocation getPortalBackgroundForType(String waystoneType) {
         if (waystoneType == null || waystoneType.isBlank()) {
@@ -686,7 +712,7 @@ public class ClientEvents {
         if (!waystoneType.equals("sharestone")) {
             // Render appropriate portal animation based on type (fallback to default)
             ResourceLocation portalBackground = getPortalBackgroundForType(waystoneType);
-            graphics.blit(portalBackground, x, y, 0, 0, 256, 256, 256, 256);
+            blitAnimatedPortalSheet(graphics, portalBackground, x, y);
             
             // Add mystical portal overlay for extra movement
             int randomFrame = (int)((System.currentTimeMillis() / 100) % 26);
@@ -701,7 +727,7 @@ public class ClientEvents {
             System.out.println("[WaystoneInjector] Rendering sharestone - Color: " + color + ", Portal: " + sharestonePortal);
             
             // Render color-specific animated portal background
-            graphics.blit(sharestonePortal, x, y, 0, 0, 256, 256, 256, 256);
+            blitAnimatedSharestonePortalSheet(graphics, sharestonePortal, x, y);
             
             // Add mystical portal overlay for extra movement
             int randomFrame = (int)((System.currentTimeMillis() / 100) % 26);
