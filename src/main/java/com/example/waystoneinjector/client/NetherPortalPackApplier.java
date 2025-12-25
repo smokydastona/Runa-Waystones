@@ -1,7 +1,9 @@
 package com.example.waystoneinjector.client;
 
+import com.example.waystoneinjector.config.NetherPortalVariant;
 import com.example.waystoneinjector.config.WaystoneConfig;
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
@@ -40,14 +42,15 @@ public class NetherPortalPackApplier {
     }
 
     private static void applyIfChanged() {
-        String variant = WaystoneConfig.NETHER_PORTAL_VARIANT.get();
+        NetherPortalVariant variant = WaystoneConfig.NETHER_PORTAL_VARIANT.get();
         if (variant == null) {
-            variant = "off";
+            variant = NetherPortalVariant.OFF;
         }
-        variant = variant.trim().toLowerCase();
+
+        String variantKey = variant.name().toLowerCase();
 
         // Avoid spamming reloads; apply only when the config value changes.
-        if (variant.equals(lastApplied)) {
+        if (variantKey.equals(lastApplied)) {
             return;
         }
 
@@ -56,7 +59,7 @@ public class NetherPortalPackApplier {
             return;
         }
 
-        boolean changed = applyToOptions(mc, variant);
+        boolean changed = applyToRepositoryAndOptions(mc, variant);
         if (changed) {
             try {
                 mc.options.save();
@@ -71,33 +74,64 @@ public class NetherPortalPackApplier {
             }
         }
 
-        lastApplied = variant;
+        lastApplied = variantKey;
     }
 
-    private static boolean applyToOptions(Minecraft mc, String variant) {
-        List<String> current = new ArrayList<>(getSelectedResourcePacks(mc.options));
+    private static boolean applyToRepositoryAndOptions(Minecraft mc, NetherPortalVariant variant) {
+        String variantKey = variant.name().toLowerCase();
+        String desiredId = variant == NetherPortalVariant.OFF ? null : (PACK_PREFIX + variantKey);
+
+        // Read current selection from the repository (this is what actually controls enabled packs).
+        PackRepository repo = mc.getResourcePackRepository();
+        List<String> currentSelected = new ArrayList<>(repo.getSelectedIds());
+        List<String> nextSelected = new ArrayList<>();
+
+        for (String id : currentSelected) {
+            if (id == null) continue;
+            if (!id.startsWith(PACK_PREFIX)) {
+                nextSelected.add(id);
+            }
+        }
+
+        if (desiredId != null && !desiredId.isBlank()) {
+            // Put ours at the end so it has highest priority.
+            nextSelected.add(desiredId);
+        }
+
+        boolean changed = !nextSelected.equals(currentSelected);
+
+        if (changed) {
+            try {
+                repo.setSelected(nextSelected);
+            } catch (Exception e) {
+                // If the repository can't be updated for any reason, still try to persist to options.
+            }
+        }
+
+        // Also mirror into options so it persists across restarts.
+        List<String> currentOptions = new ArrayList<>(getSelectedResourcePacks(mc.options));
         List<String> next = new ArrayList<>();
 
         // Remove any previously-enabled nether portal packs.
-        for (String id : current) {
+        for (String id : currentOptions) {
             if (id == null) continue;
             if (!id.startsWith(PACK_PREFIX)) {
                 next.add(id);
             }
         }
 
-        if (!variant.equals("off") && !variant.isBlank()) {
-            String desired = PACK_PREFIX + variant;
-            // Put ours at the end so it has highest priority.
-            next.add(desired);
+        if (desiredId != null && !desiredId.isBlank()) {
+            next.add(desiredId);
         }
 
-        if (next.equals(current)) {
-            return false;
+        if (next.equals(currentOptions)) {
+            // Even if options are unchanged, repository may have changed (or vice-versa).
+            // We consider this a change if either side changed.
+            return changed;
         }
 
         setSelectedResourcePacks(mc.options, next);
-        System.out.println("[WaystoneInjector] Nether portal pack set to: " + variant);
+        System.out.println("[WaystoneInjector] Nether portal pack set to: " + variantKey);
         return true;
     }
 

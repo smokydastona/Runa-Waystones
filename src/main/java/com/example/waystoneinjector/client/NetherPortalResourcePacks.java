@@ -10,6 +10,7 @@ import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.fml.ModList;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * Registers built-in resource packs that can override vanilla nether portal textures.
@@ -38,16 +39,19 @@ public class NetherPortalResourcePacks {
         event.addRepositorySource(consumer -> {
             for (String color : colors) {
                 String packId = PACK_PREFIX + color;
-                Path packPath = modFile.findResource(PACKS_ROOT, packId);
+                Path packPath = Objects.requireNonNull(modFile.findResource(PACKS_ROOT, packId), "Missing built-in pack folder: " + packId);
+
+                Component title = Objects.requireNonNull(Component.literal("WaystoneInjector Nether Portal (" + color + ")"));
+                PackSource source = Objects.requireNonNull(PackSource.BUILT_IN);
 
                 Pack pack = Pack.readMetaAndCreate(
                     packId,
-                    Component.literal("WaystoneInjector Nether Portal (" + color + ")"),
+                    title,
                     false,
                     id -> new PathPackResources(id, packPath, false),
                     PackType.CLIENT_RESOURCES,
                     Pack.Position.TOP,
-                    PackSource.BUILT_IN
+                    source
                 );
 
                 if (pack != null) {
