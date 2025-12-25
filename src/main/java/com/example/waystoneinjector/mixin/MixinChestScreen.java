@@ -70,7 +70,7 @@ public abstract class MixinChestScreen {
     )
     private void waystoneinjector_renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY, CallbackInfo ci) {
         // Title is rendered by the screen; the background render doesn't receive it.
-        // We detect the vault/void-closet screen by the current screen title string.
+        // We detect the Ze Voidrobe screen by the current screen title string.
         var screen = Minecraft.getInstance().screen;
         if (screen == null) {
             return;
@@ -79,7 +79,8 @@ public abstract class MixinChestScreen {
         String title = screen.getTitle().getString();
         String normalized = title == null ? "" : title.trim();
         // Allow suffixes like "+" and other decorations while keeping the match specific.
-        if (!normalized.startsWith("Ze Voidrobe") && !normalized.startsWith("Void Closet") && !normalized.startsWith("Vault")) {
+        // Keep "Vault" support for older servers, but do not use the old "Void Closet" name.
+        if (!normalized.startsWith("Ze Voidrobe") && !normalized.startsWith("Vault")) {
             return;
         }
 

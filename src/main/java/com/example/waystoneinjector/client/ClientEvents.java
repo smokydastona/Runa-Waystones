@@ -295,7 +295,7 @@ public class ClientEvents {
             addCustomButtons(screen, event);
 
             // Add Ze Voidrobe icon button (GUI button only; no keybind)
-            addVoidClosetButton(screen, event);
+            addZeVoidrobeButton(screen, event);
             
             // Add search box enhancement
             addSearchBoxEnhancement(screen);
@@ -311,7 +311,7 @@ public class ClientEvents {
         }
     }
 
-    private static void addVoidClosetButton(Screen screen, ScreenEvent.Init.Post event) {
+    private static void addZeVoidrobeButton(Screen screen, ScreenEvent.Init.Post event) {
         try {
             Minecraft mc = Minecraft.getInstance();
             boolean isSingleplayer = mc.hasSingleplayerServer() && mc.getSingleplayerServer() != null;
