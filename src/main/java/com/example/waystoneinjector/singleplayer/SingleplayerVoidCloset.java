@@ -1,6 +1,5 @@
 package com.example.waystoneinjector.singleplayer;
 
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.Component;
@@ -14,6 +13,9 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
+
+import javax.annotation.Nonnull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,11 +23,12 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 /**
- * Singleplayer-only implementation of the Void Closet.
+ * Singleplayer-only implementation of the Ze Voidrobe.
  *
  * This runs on the integrated server thread and persists to the current world save folder,
  * so it works with only the client mod installed.
  */
+@SuppressWarnings("null")
 public final class SingleplayerVoidCloset {
 
     public static final int SIZE = 54;
@@ -45,7 +48,7 @@ public final class SingleplayerVoidCloset {
 
             MenuProvider provider = new SimpleMenuProvider(
                 (containerId, inv, p) -> ChestMenu.sixRows(containerId, inv, container),
-                Component.literal("Void Closet")
+                Component.literal("Ze Voidrobe")
             );
 
             player.openMenu(provider);
@@ -85,7 +88,7 @@ public final class SingleplayerVoidCloset {
             if (!Files.exists(file)) return;
 
             try {
-                CompoundTag tag = NbtIo.read(file);
+                CompoundTag tag = NbtIo.read(file.toFile());
                 if (tag == null) return;
 
                 NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
@@ -94,7 +97,7 @@ public final class SingleplayerVoidCloset {
                     setItem(i, items.get(i));
                 }
             } catch (IOException e) {
-                System.err.println("[WaystoneInjector] Failed to load Void Closet NBT: " + e.getMessage());
+                System.err.println("[WaystoneInjector] Failed to load Ze Voidrobe NBT: " + e.getMessage());
             }
         }
 
@@ -112,9 +115,9 @@ public final class SingleplayerVoidCloset {
 
                 CompoundTag tag = new CompoundTag();
                 ContainerHelper.saveAllItems(tag, items);
-                NbtIo.write(tag, file);
+                NbtIo.write(tag, file.toFile());
             } catch (IOException e) {
-                System.err.println("[WaystoneInjector] Failed to save Void Closet NBT: " + e.getMessage());
+                System.err.println("[WaystoneInjector] Failed to save Ze Voidrobe NBT: " + e.getMessage());
             }
         }
 
@@ -124,7 +127,7 @@ public final class SingleplayerVoidCloset {
         }
 
         @Override
-        public void stopOpen(net.minecraft.world.entity.player.Player player) {
+        public void stopOpen(@Nonnull Player player) {
             super.stopOpen(player);
             // Save when the menu closes.
             saveToDisk();

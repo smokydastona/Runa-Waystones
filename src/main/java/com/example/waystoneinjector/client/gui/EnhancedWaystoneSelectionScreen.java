@@ -116,7 +116,7 @@ public class EnhancedWaystoneSelectionScreen extends Screen {
         
         this.addRenderableWidget(closeButton);
 
-        // Add a small icon button to open the Void Closet (server-side storage) when available.
+        // Add a small icon button to open the Ze Voidrobe (server-side storage) when available.
         // This is client-safe: the request no-ops with a friendly message if the server mod isn't present.
         int iconSize = 20;
         int iconX = this.width / 2 - 50 - 6 - iconSize;
@@ -133,7 +133,7 @@ public class EnhancedWaystoneSelectionScreen extends Screen {
             20,
             20,
             btn -> com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true),
-            Component.literal("Open Void Closet")
+            Component.literal("Open Ze Voidrobe")
         ));
         
         // Add custom buttons from config

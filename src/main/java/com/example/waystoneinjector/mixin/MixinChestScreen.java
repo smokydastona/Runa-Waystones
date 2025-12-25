@@ -73,7 +73,7 @@ public abstract class MixinChestScreen {
         }
 
         String title = screen.getTitle().getString();
-        if (!"Void Closet".equals(title) && !"Vault".equals(title)) {
+        if (!"Ze Voidrobe".equals(title) && !"Void Closet".equals(title) && !"Vault".equals(title)) {
             return;
         }
 

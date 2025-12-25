@@ -294,7 +294,7 @@ public class ClientEvents {
             System.out.println("[WaystoneInjector] ✓ Adding custom buttons...");
             addCustomButtons(screen, event);
 
-            // Add Void Closet icon button (GUI button only; no keybind)
+            // Add Ze Voidrobe icon button (GUI button only; no keybind)
             addVoidClosetButton(screen, event);
             
             // Add search box enhancement
@@ -350,7 +350,7 @@ public class ClientEvents {
                 20,
                 20,
                 btn -> {
-                    System.out.println("[WaystoneInjector] Void Closet button clicked");
+                    System.out.println("[WaystoneInjector] Ze Voidrobe button clicked");
 
                     Minecraft mc2 = Minecraft.getInstance();
                     if (mc2.hasSingleplayerServer() && mc2.getSingleplayerServer() != null && mc2.player != null) {
@@ -364,13 +364,13 @@ public class ClientEvents {
                     // Multiplayer: server mod path.
                     com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true);
                 },
-                Component.literal("Open Void Closet")
+                Component.literal("Open Ze Voidrobe")
             );
 
             event.addListener(button);
-            System.out.println("[WaystoneInjector] ✓ Added Void Closet icon button");
+            System.out.println("[WaystoneInjector] ✓ Added Ze Voidrobe icon button");
         } catch (Exception e) {
-            System.err.println("[WaystoneInjector] ✗ Failed to add Void Closet icon button: " + e.getMessage());
+            System.err.println("[WaystoneInjector] ✗ Failed to add Ze Voidrobe icon button: " + e.getMessage());
         }
     }
 
