@@ -313,10 +313,21 @@ public class ClientEvents {
 
     private static void addVoidClosetButton(Screen screen, ScreenEvent.Init.Post event) {
         try {
-            // Match the enhanced menu placement: left of the bottom-center Close button.
             int iconSize = 20;
             int iconX = screen.width / 2 - 50 - 6 - iconSize;
             int iconY = screen.height - 30;
+
+            // Prefer anchoring to the actual Close/Done button if we can find it.
+            // This keeps the icon in a reasonable spot even if Waystones changes its layout.
+            var closeButton = findBottomCloseButton(screen);
+            if (closeButton != null) {
+                iconX = closeButton.getX() - 6 - iconSize;
+                iconY = closeButton.getY();
+            }
+
+            // Clamp just in case.
+            iconX = Math.max(0, Math.min(iconX, screen.width - iconSize));
+            iconY = Math.max(0, Math.min(iconY, screen.height - iconSize));
 
             ImageButton button = new ImageButton(
                 iconX,
@@ -329,7 +340,14 @@ public class ClientEvents {
                 VOID_CLOSET_BUTTON,
                 20,
                 20,
-                btn -> com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true),
+                btn -> {
+                    System.out.println("[WaystoneInjector] Void Closet button clicked");
+                    Minecraft mc = Minecraft.getInstance();
+                    if (mc.player != null) {
+                        mc.player.sendSystemMessage(Component.literal("Opening Void Closet..."));
+                    }
+                    com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true);
+                },
                 Component.literal("Open Void Closet")
             );
 
@@ -338,6 +356,38 @@ public class ClientEvents {
         } catch (Exception e) {
             System.err.println("[WaystoneInjector] ✗ Failed to add Void Closet icon button: " + e.getMessage());
         }
+    }
+
+    private static net.minecraft.client.gui.components.AbstractWidget findBottomCloseButton(Screen screen) {
+        net.minecraft.client.gui.components.AbstractWidget best = null;
+        int bestY = Integer.MIN_VALUE;
+
+        try {
+            for (var child : screen.children()) {
+                if (!(child instanceof net.minecraft.client.gui.components.Button btn)) {
+                    continue;
+                }
+
+                String text = btn.getMessage() != null ? btn.getMessage().getString() : "";
+                if (text == null) text = "";
+                String t = text.trim();
+
+                // Waystones typically uses a bottom "Close" button; other mods may use "Done".
+                if (!(t.equalsIgnoreCase("Close") || t.equalsIgnoreCase("Done") || t.equalsIgnoreCase("Back"))) {
+                    continue;
+                }
+
+                int y = btn.getY();
+                if (y > bestY) {
+                    best = btn;
+                    bestY = y;
+                }
+            }
+        } catch (Exception ignored) {
+            return null;
+        }
+
+        return best;
     }
     
     private static void hidePaginationButtons(Screen screen, ScreenEvent.Init.Post event) {
