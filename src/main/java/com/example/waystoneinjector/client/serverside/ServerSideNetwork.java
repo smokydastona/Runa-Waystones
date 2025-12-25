@@ -20,6 +20,7 @@ import org.slf4j.Logger;
  * - If the server has the channel present, we can send C2S requests (like open vault) and receive S2C data (like server icon).
  * - If absent, all calls no-op (optionally with a friendly chat message).
  */
+@SuppressWarnings("null")
 public final class ServerSideNetwork {
 
     private static final Logger LOGGER = LogUtils.getLogger();
