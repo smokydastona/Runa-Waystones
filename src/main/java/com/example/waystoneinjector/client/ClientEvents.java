@@ -313,8 +313,12 @@ public class ClientEvents {
 
     private static void addVoidClosetButton(Screen screen, ScreenEvent.Init.Post event) {
         try {
-            // Client must be fully standalone: only show this button when the server-side mod is present.
-            if (!com.example.waystoneinjector.client.serverside.ServerSideNetwork.isServerSideModPresent()) {
+            Minecraft mc = Minecraft.getInstance();
+            boolean isSingleplayer = mc.hasSingleplayerServer() && mc.getSingleplayerServer() != null;
+
+            // Multiplayer: only show the button when the server mod is present.
+            // Singleplayer: always show, backed by integrated-server storage.
+            if (!isSingleplayer && !com.example.waystoneinjector.client.serverside.ServerSideNetwork.isServerSideModPresent()) {
                 return;
             }
 
@@ -347,7 +351,18 @@ public class ClientEvents {
                 20,
                 btn -> {
                     System.out.println("[WaystoneInjector] Void Closet button clicked");
-                    com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(false);
+
+                    Minecraft mc2 = Minecraft.getInstance();
+                    if (mc2.hasSingleplayerServer() && mc2.getSingleplayerServer() != null && mc2.player != null) {
+                        com.example.waystoneinjector.singleplayer.SingleplayerVoidCloset.open(
+                            mc2.getSingleplayerServer(),
+                            mc2.player.getUUID()
+                        );
+                        return;
+                    }
+
+                    // Multiplayer: server mod path.
+                    com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true);
                 },
                 Component.literal("Open Void Closet")
             );
