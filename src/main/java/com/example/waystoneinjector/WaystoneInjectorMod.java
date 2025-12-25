@@ -3,7 +3,9 @@ package com.example.waystoneinjector;
 import com.example.waystoneinjector.config.WaystoneConfig;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -26,6 +28,14 @@ public class WaystoneInjectorMod {
             LOGGER.debug("Registering config");
             WaystoneConfig.register();
             LOGGER.debug("Config registered");
+
+            // Add a "Config" button entry in the Forge Mods list.
+            ModLoadingContext.get().registerExtensionPoint(
+                ConfigScreenHandler.ConfigScreenFactory.class,
+                () -> new ConfigScreenHandler.ConfigScreenFactory(
+                    (mc, parent) -> new com.example.waystoneinjector.client.gui.WaystoneInjectorConfigScreen(parent)
+                )
+            );
 
             // Optional networking bridge to the server-side sister mod.
             // Safe when the server doesn't have the mod: we only send when the channel is present.
