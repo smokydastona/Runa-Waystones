@@ -8,7 +8,6 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.moddiscovery.IModFile;
 
 import java.nio.file.Path;
 
@@ -27,7 +26,7 @@ public class NetherPortalResourcePacks {
             return;
         }
 
-        IModFile modFile = ModList.get().getModFileById(WaystoneInjectorMod.MODID).getFile();
+        var modFile = ModList.get().getModFileById(WaystoneInjectorMod.MODID).getFile();
 
         // We ship one built-in pack per sharestone color.
         // Keep this list in sync with the generated resourcepacks folder names.
@@ -48,7 +47,7 @@ public class NetherPortalResourcePacks {
                     id -> new PathPackResources(id, packPath, false),
                     PackType.CLIENT_RESOURCES,
                     Pack.Position.TOP,
-                    PackSource.BUILTIN
+                    PackSource.BUILT_IN
                 );
 
                 if (pack != null) {
