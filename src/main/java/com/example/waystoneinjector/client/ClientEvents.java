@@ -65,6 +65,9 @@ public class ClientEvents {
         "waystoneinjector", "textures/gui/void_closet_button.png"
     );
 
+    private static final long VOID_CLOSET_CHAT_COOLDOWN_MS = 3000L;
+    private static long lastVoidClosetChatMs = 0L;
+
     private static final int PORTAL_FRAME_W = 256;
     private static final int PORTAL_FRAME_H = 256;
     private static final int PORTAL_SHEET_W = 256;
@@ -342,11 +345,24 @@ public class ClientEvents {
                 20,
                 btn -> {
                     System.out.println("[WaystoneInjector] Void Closet button clicked");
-                    Minecraft mc = Minecraft.getInstance();
-                    if (mc.player != null) {
-                        mc.player.sendSystemMessage(Component.literal("Opening Void Closet..."));
+
+                    // Avoid chat spam: only notify occasionally when unavailable.
+                    if (!com.example.waystoneinjector.client.serverside.ServerSideNetwork.isServerSideModPresent()) {
+                        long now = System.currentTimeMillis();
+                        if (now - lastVoidClosetChatMs >= VOID_CLOSET_CHAT_COOLDOWN_MS) {
+                            lastVoidClosetChatMs = now;
+                            Minecraft mc = Minecraft.getInstance();
+                            if (mc.player != null) {
+                                mc.player.sendSystemMessage(Component.literal(
+                                    "Void Closet is unavailable: server mod not installed on this server."
+                                ));
+                            }
+                        }
+                        return;
                     }
-                    com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true);
+
+                    // Server mod is present; send request without extra chat.
+                    com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(false);
                 },
                 Component.literal("Open Void Closet")
             );
