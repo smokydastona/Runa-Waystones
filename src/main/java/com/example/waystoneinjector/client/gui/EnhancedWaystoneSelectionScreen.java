@@ -3,10 +3,10 @@ package com.example.waystoneinjector.client.gui;
 import com.example.waystoneinjector.client.ClientEvents;
 import com.example.waystoneinjector.client.gui.widget.ScrollableWaystoneList;
 import com.example.waystoneinjector.client.gui.widget.WaystoneSearchField;
+import com.example.waystoneinjector.client.gui.widget.AnimatedImageButton;
 import com.example.waystoneinjector.config.WaystoneConfig;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("null")
 public class EnhancedWaystoneSelectionScreen extends Screen {
 
-    private static final ResourceLocation ZE_VOIDROBE_BUTTON = new ResourceLocation(
+    private static final ResourceLocation ZE_VOIDROBE_BUTTON_SHEET = new ResourceLocation(
         "waystoneinjector", "textures/gui/ze_voidrobe_button.png"
     );
     
@@ -121,17 +121,16 @@ public class EnhancedWaystoneSelectionScreen extends Screen {
         int iconSize = 20;
         int iconX = this.width / 2 - 50 - 6 - iconSize;
         int iconY = this.height - 30;
-        this.addRenderableWidget(new ImageButton(
+        this.addRenderableWidget(new AnimatedImageButton(
+            ZE_VOIDROBE_BUTTON_SHEET,
             iconX,
             iconY,
             iconSize,
             iconSize,
-            0,
-            0,
-            0,
-            ZE_VOIDROBE_BUTTON,
             20,
             20,
+            16,
+            100L,
             btn -> com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true),
             Component.literal("Open Ze Voidrobe")
         ));

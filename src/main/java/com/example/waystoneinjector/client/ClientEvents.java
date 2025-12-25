@@ -7,7 +7,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.ImageButton;
+import com.example.waystoneinjector.client.gui.widget.AnimatedImageButton;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -61,7 +62,7 @@ public class ClientEvents {
     private static final ResourceLocation PORTAL_ANIMATION = new ResourceLocation("waystoneinjector", "textures/gui/portal_animation.png");
     private static final ResourceLocation PORTSTONE_PORTAL = new ResourceLocation("waystoneinjector", "textures/gui/portstone_portal.png");
 
-    private static final ResourceLocation ZE_VOIDROBE_BUTTON = new ResourceLocation(
+    private static final ResourceLocation ZE_VOIDROBE_BUTTON_SHEET = new ResourceLocation(
         "waystoneinjector", "textures/gui/ze_voidrobe_button.png"
     );
 
@@ -338,17 +339,16 @@ public class ClientEvents {
             iconX = Math.max(0, Math.min(iconX, screen.width - iconSize));
             iconY = Math.max(0, Math.min(iconY, screen.height - iconSize));
 
-            ImageButton button = new ImageButton(
+            AnimatedImageButton button = new AnimatedImageButton(
+                ZE_VOIDROBE_BUTTON_SHEET,
                 iconX,
                 iconY,
                 iconSize,
                 iconSize,
-                0,
-                0,
-                0,
-                ZE_VOIDROBE_BUTTON,
                 20,
                 20,
+                16,
+                100L,
                 btn -> {
                     System.out.println("[WaystoneInjector] Ze Voidrobe button clicked");
 
