@@ -1,21 +1,48 @@
 package com.example.waystoneinjector.client.gui;
 
+import com.example.waystoneinjector.WaystoneInjectorMod;
+import com.example.waystoneinjector.config.NetherPortalVariant;
+import com.example.waystoneinjector.config.WaystoneConfig;
+import com.mojang.logging.LogUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraftforge.fml.config.ConfigTracker;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
+import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
+@SuppressWarnings("null")
 public class WaystoneInjectorConfigScreen extends Screen {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    private static final int TOP = 32;
+    private static final int BOTTOM_PADDING = 36;
+    private static final int ROW_H = 24;
+    private static final int HEADER_H = 18;
+
     private final Screen parent;
+    private final List<Row> rows = new ArrayList<>();
+
+    private double scroll;
+    private int contentHeight;
+    private String errorMessage;
+
     private Path configPath;
+
+    // Special-case: feverdream redirects are a list in TOML.
+    private EditBox feverdreamRedirects;
 
     public WaystoneInjectorConfigScreen(Screen parent) {
         super(Component.literal("Waystone Button Injector Config"));
@@ -23,28 +50,175 @@ public class WaystoneInjectorConfigScreen extends Screen {
     }
 
     @Override
-    @SuppressWarnings("null")
     protected void init() {
+        this.errorMessage = null;
+        this.rows.clear();
+        this.scroll = clampScroll(this.scroll);
         this.configPath = FMLPaths.CONFIGDIR.get().resolve("waystoneinjector-client.toml");
 
-        int centerX = this.width / 2;
-        int y = this.height / 4;
-
-        this.addRenderableWidget(Button.builder(Component.literal("Open Config File"), (b) -> openConfigFile())
-            .bounds(centerX - 100, y, 200, 20)
+        int bottomY = this.height - 28;
+        this.addRenderableWidget(Button.builder(Component.literal("Save"), (b) -> onSave())
+            .bounds(this.width / 2 - 154, bottomY, 100, 20)
+            .build());
+        this.addRenderableWidget(Button.builder(Component.literal("Cancel"), (b) -> onClose())
+            .bounds(this.width / 2 - 50, bottomY, 100, 20)
+            .build());
+        this.addRenderableWidget(Button.builder(Component.literal("Open File"), (b) -> openConfigFile())
+            .bounds(this.width / 2 + 54, bottomY, 100, 20)
             .build());
 
-        this.addRenderableWidget(Button.builder(Component.literal("Open Config Folder"), (b) -> openConfigFolder())
-            .bounds(centerX - 100, y + 24, 200, 20)
-            .build());
+        buildRows();
+        recalcContentHeight();
+        updateWidgetPositions();
+    }
 
-        this.addRenderableWidget(Button.builder(Component.literal("Copy Config Path"), (b) -> copyConfigPath())
-            .bounds(centerX - 100, y + 48, 200, 20)
-            .build());
+    private void buildRows() {
+        addHeader("Buttons");
+        for (int i = 1; i <= 6; i++) {
+            addButtonSection(i);
+        }
 
-        this.addRenderableWidget(Button.builder(Component.literal("Done"), (b) -> onClose())
-            .bounds(centerX - 100, y + 84, 200, 20)
-            .build());
+        addHeader("Nether Portal");
+        addEnumRow(
+            "Variant",
+            WaystoneConfig.NETHER_PORTAL_VARIANT.get(),
+            NetherPortalVariant.values(),
+            (val) -> WaystoneConfig.NETHER_PORTAL_VARIANT.set(val)
+        );
+
+        addHeader("Feverdream");
+        this.feverdreamRedirects = addStringRow(
+            "Redirects",
+            String.join(" ; ", WaystoneConfig.FEVERDREAM_REDIRECTS.get()),
+            (value) -> {
+                List<String> parsed = parseRedirectList(value);
+                WaystoneConfig.FEVERDREAM_REDIRECTS.set(parsed);
+            },
+            512
+        );
+
+        addIntRow(
+            "Death Count",
+            WaystoneConfig.FEVERDREAM_DEATH_COUNT.get(),
+            1,
+            10,
+            (val) -> WaystoneConfig.FEVERDREAM_DEATH_COUNT.set(val)
+        );
+    }
+
+    private void addButtonSection(int idx) {
+        addHeader("Button " + idx);
+        ButtonSpec spec = ButtonSpec.of(idx);
+
+        addBooleanRow("Enabled", spec.enabled.get(), spec.enabled::set);
+        addStringRow("Label", spec.label.get(), spec.label::set, 256);
+        addStringRow("Command", spec.command.get(), spec.command::set, 512);
+
+        addIntRow("Width", spec.width.get(), 20, 200, spec.width::set);
+        addIntRow("Height", spec.height.get(), 15, 100, spec.height::set);
+        addStringRow("Text Color", spec.textColor.get(), spec.textColor::set, 32);
+
+        addEnumStringRow("Side", spec.side.get(), new String[] { "auto", "left", "right" }, spec.side::set);
+        addStringRow("Server Address", spec.serverAddress.get(), spec.serverAddress::set, 256);
+        addIntRow("X Offset", spec.xOffset.get(), -500, 500, spec.xOffset::set);
+        addIntRow("Y Offset", spec.yOffset.get(), -500, 500, spec.yOffset::set);
+
+        addStringRow("Death Redirect", spec.deathRedirect.get(), spec.deathRedirect::set, 512);
+        addStringRow("Sleep Redirect", spec.sleepRedirect.get(), spec.sleepRedirect::set, 512);
+        addIntRow("Sleep Chance", spec.sleepChance.get(), 0, 100, spec.sleepChance::set);
+    }
+
+    private void addHeader(String text) {
+        rows.add(Row.header(text));
+    }
+
+    private EditBox addStringRow(String label, String initial, java.util.function.Consumer<String> apply, int maxLen) {
+        EditBox box = new EditBox(this.font, 0, 0, 220, 18, Component.literal(label));
+        box.setMaxLength(maxLen);
+        box.setValue(initial == null ? "" : initial);
+        rows.add(Row.withWidget(label, box, () -> apply.accept(box.getValue())));
+        this.addRenderableWidget(box);
+        return box;
+    }
+
+    private void addIntRow(String label, int initial, int min, int max, java.util.function.IntConsumer apply) {
+        EditBox box = new EditBox(this.font, 0, 0, 100, 18, Component.literal(label));
+        box.setMaxLength(16);
+        box.setValue(Integer.toString(initial));
+        box.setFilter((s) -> s.isEmpty() || s.matches("-?\\d+"));
+        rows.add(Row.withWidget(label, box, () -> {
+            int parsed = parseIntClamped(box.getValue(), initial, min, max);
+            apply.accept(parsed);
+            box.setValue(Integer.toString(parsed));
+        }));
+        this.addRenderableWidget(box);
+    }
+
+    private void addBooleanRow(String label, boolean initial, java.util.function.Consumer<Boolean> apply) {
+        ToggleButton toggle = new ToggleButton(0, 0, 100, 20, initial);
+        rows.add(Row.withWidget(label, toggle, () -> apply.accept(toggle.value())));
+        this.addRenderableWidget(toggle);
+    }
+
+    private void addEnumStringRow(String label, String initial, String[] values, java.util.function.Consumer<String> apply) {
+        CycleButton<String> cycle = new CycleButton<>(0, 0, 140, 20, values, initial);
+        rows.add(Row.withWidget(label, cycle, () -> apply.accept(cycle.value())));
+        this.addRenderableWidget(cycle);
+    }
+
+    private <T extends Enum<T>> void addEnumRow(String label, T initial, T[] values, java.util.function.Consumer<T> apply) {
+        CycleButton<T> cycle = new CycleButton<>(0, 0, 180, 20, values, initial);
+        rows.add(Row.withWidget(label, cycle, () -> apply.accept(cycle.value())));
+        this.addRenderableWidget(cycle);
+    }
+
+    private void onSave() {
+        this.errorMessage = null;
+        try {
+            if (this.feverdreamRedirects != null) {
+                List<String> parsed = parseRedirectList(this.feverdreamRedirects.getValue());
+                for (String entry : parsed) {
+                    if (!isValidFeverdreamRedirect(entry)) {
+                        this.errorMessage = "Invalid Feverdream redirect: " + entry;
+                        return;
+                    }
+                }
+            }
+
+            for (Row row : rows) {
+                row.apply();
+            }
+
+            ModConfig clientCfg = findClientConfig();
+            if (clientCfg != null) {
+                clientCfg.save();
+                LOGGER.info("Saved client config to {}", clientCfg.getFullPath());
+            } else {
+                LOGGER.warn("Could not find ModConfig instance; values set in memory but not saved");
+            }
+
+            onClose();
+        } catch (Exception e) {
+            LOGGER.error("Failed to save config", e);
+            this.errorMessage = "Failed to save config: " + e.getClass().getSimpleName();
+        }
+    }
+
+    private static ModConfig findClientConfig() {
+        try {
+            Set<ModConfig> configs = ConfigTracker.INSTANCE.configSets().get(ModConfig.Type.CLIENT);
+            if (configs == null) {
+                return null;
+            }
+            for (ModConfig cfg : configs) {
+                if (WaystoneInjectorMod.MODID.equals(cfg.getModId())) {
+                    return cfg;
+                }
+            }
+            return null;
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private void openConfigFile() {
@@ -53,49 +227,332 @@ public class WaystoneInjectorConfigScreen extends Screen {
             Util.getPlatform().openFile(path.toFile());
             return;
         }
-
-        openConfigFolder();
-    }
-
-    private void openConfigFolder() {
-        Path dir = FMLPaths.CONFIGDIR.get();
-        Util.getPlatform().openFile(dir.toFile());
-    }
-
-    private void copyConfigPath() {
-        Minecraft mc = this.minecraft;
-        if (mc == null || this.configPath == null) {
-            return;
-        }
-        mc.keyboardHandler.setClipboard(this.configPath.toString());
+        Util.getPlatform().openFile(FMLPaths.CONFIGDIR.get().toFile());
     }
 
     @Override
     public void onClose() {
-        if (this.minecraft != null) {
-            this.minecraft.setScreen(this.parent);
+        Minecraft mc = this.minecraft;
+        if (mc != null) {
+            mc.setScreen(this.parent);
         }
     }
 
     @Override
-    @SuppressWarnings("null")
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        int viewBottom = this.height - BOTTOM_PADDING;
+        if (mouseY < TOP || mouseY > viewBottom) {
+            return super.mouseScrolled(mouseX, mouseY, delta);
+        }
+        this.scroll = clampScroll(this.scroll - delta * 18.0);
+        updateWidgetPositions();
+        return true;
+    }
+
+    private double clampScroll(double value) {
+        int viewHeight = (this.height - BOTTOM_PADDING) - TOP;
+        int max = Math.max(0, this.contentHeight - viewHeight);
+        if (value < 0) return 0;
+        if (value > max) return max;
+        return value;
+    }
+
+    private void recalcContentHeight() {
+        int h = 0;
+        for (Row row : rows) {
+            h += row.height;
+        }
+        this.contentHeight = h;
+        this.scroll = clampScroll(this.scroll);
+    }
+
+    private void updateWidgetPositions() {
+        int viewBottom = this.height - BOTTOM_PADDING;
+        int y = TOP - (int) this.scroll;
+        for (Row row : rows) {
+            row.setY(y);
+            boolean visible = y + row.height >= TOP && y <= viewBottom;
+            row.setVisible(visible);
+            y += row.height;
+        }
+    }
+
+    @Override
     public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
 
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFFFFF);
 
-        int left = 20;
-        int y = 55;
-        graphics.drawString(this.font, Component.literal("This mod uses a Forge client TOML config."), left, y, 0xA0A0A0);
-        y += 12;
+        // Clip-like behavior: we just avoid drawing labels outside the scroll area.
+        int viewBottom = this.height - BOTTOM_PADDING;
+        int labelX = 18;
 
-        if (this.configPath != null) {
-            graphics.drawString(this.font, Component.literal("Config file: " + this.configPath), left, y, 0xA0A0A0);
-            y += 12;
+        int y = TOP - (int) this.scroll;
+        for (Row row : rows) {
+            if (y + row.height >= TOP && y <= viewBottom) {
+                int color = row.isHeader ? 0xFFD080 : 0xE0E0E0;
+                graphics.drawString(this.font, Component.literal(row.label), labelX, y + (row.isHeader ? 4 : 6), color);
+            }
+            y += row.height;
         }
 
-        graphics.drawString(this.font, Component.literal("Edit the file externally, then re-open the screen or restart to apply changes."), left, y, 0xA0A0A0);
+        if (this.errorMessage != null) {
+            graphics.drawCenteredString(this.font, Component.literal(this.errorMessage), this.width / 2, this.height - 52, 0xFF6060);
+        }
 
+        // Ensure widgets are positioned for this frame.
+        updateWidgetPositions();
         super.render(graphics, mouseX, mouseY, partialTick);
+    }
+
+    private static int parseIntClamped(String value, int fallback, int min, int max) {
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            if (parsed < min) return min;
+            if (parsed > max) return max;
+            return parsed;
+        } catch (Exception ignored) {
+            return fallback;
+        }
+    }
+
+    private static List<String> parseRedirectList(String text) {
+        List<String> out = new ArrayList<>();
+        if (text == null) {
+            return out;
+        }
+        for (String part : text.split(";")) {
+            String trimmed = part.trim();
+            if (!trimmed.isEmpty()) {
+                out.add(trimmed);
+            }
+        }
+        return out;
+    }
+
+    private static boolean isValidFeverdreamRedirect(String s) {
+        if (s == null) return false;
+        String trimmed = s.trim();
+        return trimmed.contains("->") && (trimmed.startsWith("death:") || trimmed.startsWith("sleep:"));
+    }
+
+    private static final class Row {
+        final String label;
+        final boolean isHeader;
+        final int height;
+        final List<net.minecraft.client.gui.components.AbstractWidget> widgets;
+        final Runnable apply;
+
+        private Row(String label, boolean isHeader, int height, List<net.minecraft.client.gui.components.AbstractWidget> widgets, Runnable apply) {
+            this.label = label;
+            this.isHeader = isHeader;
+            this.height = height;
+            this.widgets = widgets;
+            this.apply = apply;
+        }
+
+        static Row header(String label) {
+            return new Row(label, true, HEADER_H, List.of(), () -> {});
+        }
+
+        static Row withWidget(String label, net.minecraft.client.gui.components.AbstractWidget widget, Runnable apply) {
+            return new Row(label, false, ROW_H, List.of(widget), apply);
+        }
+
+        void setY(int y) {
+            int widgetX = 0;
+            for (net.minecraft.client.gui.components.AbstractWidget w : widgets) {
+                widgetX = w.getWidth() == 100 ?  thisWidgetX(100) : thisWidgetX(w.getWidth());
+                w.setX(widgetX);
+                w.setY(y + 2);
+            }
+        }
+
+        private int thisWidgetX(int widgetWidth) {
+            // Right-align widgets with a small margin.
+            return Minecraft.getInstance().getWindow().getGuiScaledWidth() - widgetWidth - 18;
+        }
+
+        void setVisible(boolean visible) {
+            for (net.minecraft.client.gui.components.AbstractWidget w : widgets) {
+                w.visible = visible;
+                w.active = visible;
+            }
+        }
+
+        void apply() {
+            if (apply != null) {
+                apply.run();
+            }
+        }
+    }
+
+    private static final class ToggleButton extends Button {
+        private boolean value;
+
+        ToggleButton(int x, int y, int w, int h, boolean initial) {
+            super(x, y, w, h, labelFor(initial), (b) -> {}, DEFAULT_NARRATION);
+            this.value = initial;
+        }
+
+        @Override
+        public void onPress() {
+            this.value = !this.value;
+            this.setMessage(labelFor(this.value));
+        }
+
+        boolean value() {
+            return this.value;
+        }
+
+        private static Component labelFor(boolean v) {
+            return Component.literal(v ? "ON" : "OFF");
+        }
+    }
+
+    private static final class CycleButton<T> extends Button {
+        private final T[] values;
+        private int index;
+
+        CycleButton(int x, int y, int w, int h, T[] values, T initial) {
+            super(x, y, w, h, Component.literal(String.valueOf(initial)), (b) -> {}, DEFAULT_NARRATION);
+            this.values = values;
+            this.index = 0;
+            for (int i = 0; i < values.length; i++) {
+                if (values[i].equals(initial)) {
+                    this.index = i;
+                    break;
+                }
+            }
+            this.setMessage(Component.literal(String.valueOf(values[this.index])));
+        }
+
+        @Override
+        public void onPress() {
+            if (values.length == 0) {
+                return;
+            }
+            this.index = (this.index + 1) % values.length;
+            this.setMessage(Component.literal(String.valueOf(values[this.index])));
+        }
+
+        T value() {
+            if (values.length == 0) {
+                return null;
+            }
+            return values[this.index];
+        }
+    }
+
+    private record ButtonSpec(
+        net.minecraftforge.common.ForgeConfigSpec.BooleanValue enabled,
+        net.minecraftforge.common.ForgeConfigSpec.ConfigValue<String> label,
+        net.minecraftforge.common.ForgeConfigSpec.ConfigValue<String> command,
+        net.minecraftforge.common.ForgeConfigSpec.IntValue width,
+        net.minecraftforge.common.ForgeConfigSpec.IntValue height,
+        net.minecraftforge.common.ForgeConfigSpec.ConfigValue<String> textColor,
+        net.minecraftforge.common.ForgeConfigSpec.ConfigValue<String> side,
+        net.minecraftforge.common.ForgeConfigSpec.ConfigValue<String> serverAddress,
+        net.minecraftforge.common.ForgeConfigSpec.IntValue xOffset,
+        net.minecraftforge.common.ForgeConfigSpec.IntValue yOffset,
+        net.minecraftforge.common.ForgeConfigSpec.ConfigValue<String> deathRedirect,
+        net.minecraftforge.common.ForgeConfigSpec.ConfigValue<String> sleepRedirect,
+        net.minecraftforge.common.ForgeConfigSpec.IntValue sleepChance
+    ) {
+        static ButtonSpec of(int idx) {
+            return switch (idx) {
+                case 1 -> new ButtonSpec(
+                    WaystoneConfig.BUTTON1_ENABLED,
+                    WaystoneConfig.BUTTON1_LABEL,
+                    WaystoneConfig.BUTTON1_COMMAND,
+                    WaystoneConfig.BUTTON1_WIDTH,
+                    WaystoneConfig.BUTTON1_HEIGHT,
+                    WaystoneConfig.BUTTON1_TEXT_COLOR,
+                    WaystoneConfig.BUTTON1_SIDE,
+                    WaystoneConfig.BUTTON1_SERVER_ADDRESS,
+                    WaystoneConfig.BUTTON1_X_OFFSET,
+                    WaystoneConfig.BUTTON1_Y_OFFSET,
+                    WaystoneConfig.BUTTON1_DEATH_REDIRECT,
+                    WaystoneConfig.BUTTON1_SLEEP_REDIRECT,
+                    WaystoneConfig.BUTTON1_SLEEP_CHANCE
+                );
+                case 2 -> new ButtonSpec(
+                    WaystoneConfig.BUTTON2_ENABLED,
+                    WaystoneConfig.BUTTON2_LABEL,
+                    WaystoneConfig.BUTTON2_COMMAND,
+                    WaystoneConfig.BUTTON2_WIDTH,
+                    WaystoneConfig.BUTTON2_HEIGHT,
+                    WaystoneConfig.BUTTON2_TEXT_COLOR,
+                    WaystoneConfig.BUTTON2_SIDE,
+                    WaystoneConfig.BUTTON2_SERVER_ADDRESS,
+                    WaystoneConfig.BUTTON2_X_OFFSET,
+                    WaystoneConfig.BUTTON2_Y_OFFSET,
+                    WaystoneConfig.BUTTON2_DEATH_REDIRECT,
+                    WaystoneConfig.BUTTON2_SLEEP_REDIRECT,
+                    WaystoneConfig.BUTTON2_SLEEP_CHANCE
+                );
+                case 3 -> new ButtonSpec(
+                    WaystoneConfig.BUTTON3_ENABLED,
+                    WaystoneConfig.BUTTON3_LABEL,
+                    WaystoneConfig.BUTTON3_COMMAND,
+                    WaystoneConfig.BUTTON3_WIDTH,
+                    WaystoneConfig.BUTTON3_HEIGHT,
+                    WaystoneConfig.BUTTON3_TEXT_COLOR,
+                    WaystoneConfig.BUTTON3_SIDE,
+                    WaystoneConfig.BUTTON3_SERVER_ADDRESS,
+                    WaystoneConfig.BUTTON3_X_OFFSET,
+                    WaystoneConfig.BUTTON3_Y_OFFSET,
+                    WaystoneConfig.BUTTON3_DEATH_REDIRECT,
+                    WaystoneConfig.BUTTON3_SLEEP_REDIRECT,
+                    WaystoneConfig.BUTTON3_SLEEP_CHANCE
+                );
+                case 4 -> new ButtonSpec(
+                    WaystoneConfig.BUTTON4_ENABLED,
+                    WaystoneConfig.BUTTON4_LABEL,
+                    WaystoneConfig.BUTTON4_COMMAND,
+                    WaystoneConfig.BUTTON4_WIDTH,
+                    WaystoneConfig.BUTTON4_HEIGHT,
+                    WaystoneConfig.BUTTON4_TEXT_COLOR,
+                    WaystoneConfig.BUTTON4_SIDE,
+                    WaystoneConfig.BUTTON4_SERVER_ADDRESS,
+                    WaystoneConfig.BUTTON4_X_OFFSET,
+                    WaystoneConfig.BUTTON4_Y_OFFSET,
+                    WaystoneConfig.BUTTON4_DEATH_REDIRECT,
+                    WaystoneConfig.BUTTON4_SLEEP_REDIRECT,
+                    WaystoneConfig.BUTTON4_SLEEP_CHANCE
+                );
+                case 5 -> new ButtonSpec(
+                    WaystoneConfig.BUTTON5_ENABLED,
+                    WaystoneConfig.BUTTON5_LABEL,
+                    WaystoneConfig.BUTTON5_COMMAND,
+                    WaystoneConfig.BUTTON5_WIDTH,
+                    WaystoneConfig.BUTTON5_HEIGHT,
+                    WaystoneConfig.BUTTON5_TEXT_COLOR,
+                    WaystoneConfig.BUTTON5_SIDE,
+                    WaystoneConfig.BUTTON5_SERVER_ADDRESS,
+                    WaystoneConfig.BUTTON5_X_OFFSET,
+                    WaystoneConfig.BUTTON5_Y_OFFSET,
+                    WaystoneConfig.BUTTON5_DEATH_REDIRECT,
+                    WaystoneConfig.BUTTON5_SLEEP_REDIRECT,
+                    WaystoneConfig.BUTTON5_SLEEP_CHANCE
+                );
+                case 6 -> new ButtonSpec(
+                    WaystoneConfig.BUTTON6_ENABLED,
+                    WaystoneConfig.BUTTON6_LABEL,
+                    WaystoneConfig.BUTTON6_COMMAND,
+                    WaystoneConfig.BUTTON6_WIDTH,
+                    WaystoneConfig.BUTTON6_HEIGHT,
+                    WaystoneConfig.BUTTON6_TEXT_COLOR,
+                    WaystoneConfig.BUTTON6_SIDE,
+                    WaystoneConfig.BUTTON6_SERVER_ADDRESS,
+                    WaystoneConfig.BUTTON6_X_OFFSET,
+                    WaystoneConfig.BUTTON6_Y_OFFSET,
+                    WaystoneConfig.BUTTON6_DEATH_REDIRECT,
+                    WaystoneConfig.BUTTON6_SLEEP_REDIRECT,
+                    WaystoneConfig.BUTTON6_SLEEP_CHANCE
+                );
+                default -> throw new IllegalArgumentException("Invalid button index: " + idx);
+            };
+        }
     }
 }
