@@ -33,7 +33,7 @@ public class WaystoneInjectorMod {
             ModLoadingContext.get().registerExtensionPoint(
                 ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory(
-                    (mc, parent) -> new com.example.waystoneinjector.client.gui.WaystoneInjectorConfigScreen(parent)
+                        (mc, parent) -> new com.example.waystoneinjector.client.gui.WaystoneInjectorConfigHomeScreen(parent)
                 )
             );
 

@@ -22,6 +22,10 @@ public abstract class MixinChestScreen {
     private static final @Nonnull ResourceLocation ZE_VOIDROBE_BG = new ResourceLocation(
         "waystoneinjector", "textures/gui/ze_voidrobe.png"
     );
+    // The Ze Voidrobe background texture is a 2x-style GUI (352x442).
+    // We must use the actual texture size in blit() so UVs map correctly.
+    private static final int ZE_VOIDROBE_TEX_W = 352;
+    private static final int ZE_VOIDROBE_TEX_H = 442;
 
     // Animated portal background (same sprite sheet used behind Waystone menus)
     private static final @Nonnull ResourceLocation PORTAL_ANIMATION = new ResourceLocation(
@@ -101,8 +105,7 @@ public abstract class MixinChestScreen {
         int x = (screenW - imageW) / 2;
         int y = (screenH - imageH) / 2;
 
-        // The vanilla chest GUI texture is 256x256; we match that convention.
-        guiGraphics.blit(ZE_VOIDROBE_BG, x, y, 0, 0, imageW, imageH, 256, 256);
+        guiGraphics.blit(ZE_VOIDROBE_BG, x, y, 0, 0, imageW, imageH, ZE_VOIDROBE_TEX_W, ZE_VOIDROBE_TEX_H);
 
         RenderSystem.disableBlend();
         ci.cancel();

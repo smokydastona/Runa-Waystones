@@ -34,6 +34,7 @@ public class WaystoneInjectorConfigScreen extends Screen {
     private static final int HEADER_H = 18;
 
     private final Screen parent;
+    private final Page page;
     private final List<Row> rows = new ArrayList<>();
 
     // Collapsible sections (used to keep the per-button settings from becoming a wall of fields).
@@ -48,15 +49,27 @@ public class WaystoneInjectorConfigScreen extends Screen {
     // Special-case: feverdream redirects are a list in TOML.
     private EditBox feverdreamRedirects;
 
+    public enum Page {
+        BUTTONS,
+        NETHER_PORTAL,
+        FEVERDREAM
+    }
+
     public WaystoneInjectorConfigScreen(Screen parent) {
+        this(parent, Page.BUTTONS);
+    }
+
+    public WaystoneInjectorConfigScreen(Screen parent, Page page) {
         super(Component.literal("Waystone Button Injector Config"));
         this.parent = parent;
+        this.page = page == null ? Page.BUTTONS : page;
     }
 
     @Override
     protected void init() {
         this.errorMessage = null;
         this.rows.clear();
+        this.collapsedSections.clear();
         this.scroll = clampScroll(this.scroll);
         this.configPath = FMLPaths.CONFIGDIR.get().resolve("waystoneinjector-client.toml");
 
@@ -64,7 +77,7 @@ public class WaystoneInjectorConfigScreen extends Screen {
         this.addRenderableWidget(Button.builder(Component.literal("Save"), (b) -> onSave())
             .bounds(this.width / 2 - 154, bottomY, 100, 20)
             .build());
-        this.addRenderableWidget(Button.builder(Component.literal("Cancel"), (b) -> onClose())
+        this.addRenderableWidget(Button.builder(Component.literal("Back"), (b) -> onClose())
             .bounds(this.width / 2 - 50, bottomY, 100, 20)
             .build());
         this.addRenderableWidget(Button.builder(Component.literal("Open File"), (b) -> openConfigFile())
@@ -77,37 +90,43 @@ public class WaystoneInjectorConfigScreen extends Screen {
     }
 
     private void buildRows() {
-        addHeader("Buttons");
-        for (int i = 1; i <= 6; i++) {
-            addButtonSection(i);
+        switch (this.page) {
+            case BUTTONS -> {
+                addHeader("Buttons");
+                for (int i = 1; i <= 6; i++) {
+                    addButtonSection(i);
+                }
+            }
+            case NETHER_PORTAL -> {
+                addHeader("Nether Portal");
+                addEnumRow(
+                    "Variant",
+                    WaystoneConfig.NETHER_PORTAL_VARIANT.get(),
+                    NetherPortalVariant.values(),
+                    (val) -> WaystoneConfig.NETHER_PORTAL_VARIANT.set(val)
+                );
+            }
+            case FEVERDREAM -> {
+                addHeader("Feverdream");
+                this.feverdreamRedirects = addStringRow(
+                    "Redirects",
+                    String.join(" ; ", WaystoneConfig.FEVERDREAM_REDIRECTS.get()),
+                    (value) -> {
+                        List<String> parsed = parseRedirectList(value);
+                        WaystoneConfig.FEVERDREAM_REDIRECTS.set(parsed);
+                    },
+                    512
+                );
+
+                addIntRow(
+                    "Death Count",
+                    WaystoneConfig.FEVERDREAM_DEATH_COUNT.get(),
+                    1,
+                    10,
+                    (val) -> WaystoneConfig.FEVERDREAM_DEATH_COUNT.set(val)
+                );
+            }
         }
-
-        addHeader("Nether Portal");
-        addEnumRow(
-            "Variant",
-            WaystoneConfig.NETHER_PORTAL_VARIANT.get(),
-            NetherPortalVariant.values(),
-            (val) -> WaystoneConfig.NETHER_PORTAL_VARIANT.set(val)
-        );
-
-        addHeader("Feverdream");
-        this.feverdreamRedirects = addStringRow(
-            "Redirects",
-            String.join(" ; ", WaystoneConfig.FEVERDREAM_REDIRECTS.get()),
-            (value) -> {
-                List<String> parsed = parseRedirectList(value);
-                WaystoneConfig.FEVERDREAM_REDIRECTS.set(parsed);
-            },
-            512
-        );
-
-        addIntRow(
-            "Death Count",
-            WaystoneConfig.FEVERDREAM_DEATH_COUNT.get(),
-            1,
-            10,
-            (val) -> WaystoneConfig.FEVERDREAM_DEATH_COUNT.set(val)
-        );
     }
 
     private void addButtonSection(int idx) {

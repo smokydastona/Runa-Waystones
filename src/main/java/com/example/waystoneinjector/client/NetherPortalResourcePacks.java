@@ -19,9 +19,6 @@ import java.util.Objects;
  */
 public class NetherPortalResourcePacks {
 
-    private static final String PACKS_ROOT = "resourcepacks";
-    private static final String PACK_PREFIX = "waystoneinjector_nether_portal_";
-
     public static void onAddPackFinders(AddPackFindersEvent event) {
         if (event.getPackType() != PackType.CLIENT_RESOURCES) {
             return;
@@ -38,8 +35,8 @@ public class NetherPortalResourcePacks {
 
         event.addRepositorySource(consumer -> {
             for (String color : colors) {
-                String packId = PACK_PREFIX + color;
-                Path packPath = Objects.requireNonNull(modFile.findResource(PACKS_ROOT, packId), "Missing built-in pack folder: " + packId);
+                String packId = "waystoneinjector_nether_portal_" + color;
+                Path packPath = Objects.requireNonNull(modFile.findResource("resourcepacks", packId), "Missing built-in pack folder: " + packId);
 
                 Component title = Objects.requireNonNull(Component.literal("WaystoneInjector Nether Portal (" + color + ")"));
                 PackSource source = Objects.requireNonNull(PackSource.BUILT_IN);
