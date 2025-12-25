@@ -29,8 +29,10 @@ public final class KeybindHandler {
 
     private static final String KEY_CATEGORY = "key.categories.waystoneinjector";
     private static final String KEY_USE_TELEPORT_ITEM = "key.waystoneinjector.use_teleport_item";
+    private static final String KEY_OPEN_VAULT = "key.waystoneinjector.open_vault";
 
     private static KeyMapping useTeleportItem;
+    private static KeyMapping openVault;
 
     private static boolean loggedWaystonesBindings;
     private static boolean loggedNoTeleportItemOnce;
@@ -88,6 +90,11 @@ public final class KeybindHandler {
         useTeleportItem = new KeyMapping(KEY_USE_TELEPORT_ITEM, GLFW.GLFW_KEY_RIGHT_ALT, KEY_CATEGORY);
         event.register(useTeleportItem);
         LOGGER.info("Registered keybind {} (default=RIGHT_ALT)", KEY_USE_TELEPORT_ITEM);
+
+        // Optional server-side vault: default to V; safe when server mod isn't present (we guard at runtime).
+        openVault = new KeyMapping(KEY_OPEN_VAULT, GLFW.GLFW_KEY_V, KEY_CATEGORY);
+        event.register(openVault);
+        LOGGER.info("Registered keybind {} (default=V)", KEY_OPEN_VAULT);
     }
 
     @SubscribeEvent
@@ -103,6 +110,18 @@ public final class KeybindHandler {
         }
 
         if (useTeleportItem == null) return;
+
+        if (openVault != null && openVault.consumeClick()) {
+            // Don't conflict with in-progress teleport-item sequences.
+            if (pendingAction == PendingAction.NONE && keybindCooldownTicks <= 0) {
+                com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true);
+                keybindCooldownTicks = 10;
+            }
+
+            while (openVault.consumeClick()) {
+                // flush
+            }
+        }
 
         if (keybindCooldownTicks > 0) {
             keybindCooldownTicks--;

@@ -25,6 +25,10 @@ public class WaystoneInjectorMod {
             LOGGER.debug("Registering config");
             WaystoneConfig.register();
             LOGGER.debug("Config registered");
+
+            // Optional networking bridge to the server-side sister mod.
+            // Safe when the server doesn't have the mod: we only send when the channel is present.
+            com.example.waystoneinjector.client.serverside.ServerSideNetwork.init();
             
             // Register client-only event handlers (static methods require class registration)
             LOGGER.debug("Registering ClientEvents");
