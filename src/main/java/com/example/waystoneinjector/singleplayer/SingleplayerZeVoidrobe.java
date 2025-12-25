@@ -43,8 +43,8 @@ public final class SingleplayerZeVoidrobe {
             ServerPlayer player = server.getPlayerList().getPlayer(playerId);
             if (player == null) return;
 
-            StorageFiles files = getStorageFiles(server, playerId);
-            PersistentContainer container = new PersistentContainer(files);
+            Path file = getStorageFile(server, playerId);
+            PersistentContainer container = new PersistentContainer(file);
 
             MenuProvider provider = new SimpleMenuProvider(
                 (containerId, inv, p) -> ChestMenu.sixRows(containerId, inv, container),
@@ -55,79 +55,44 @@ public final class SingleplayerZeVoidrobe {
         });
     }
 
-    private record StorageFiles(Path primary, Path legacy) {
-    }
-
-    private static StorageFiles getStorageFiles(MinecraftServer server, UUID playerId) {
+    private static Path getStorageFile(MinecraftServer server, UUID playerId) {
         // Prefer per-world storage.
         try {
             Path worldRoot = server.getWorldPath(LevelResource.ROOT);
 
             Path primaryDir = worldRoot.resolve("data").resolve("waystoneinjector").resolve("ze_voidrobe");
-            Path legacyDir = worldRoot.resolve("data").resolve("waystoneinjector").resolve("void_closet");
 
             Files.createDirectories(primaryDir);
 
             Path primary = primaryDir.resolve(playerId.toString() + ".dat");
-            Path legacy = legacyDir.resolve(playerId.toString() + ".dat");
-
-            migrateIfNeeded(primary, legacy);
-            return new StorageFiles(primary, legacy);
+            return primary;
         } catch (Throwable t) {
             // Fallback: config folder (still local, but shared across worlds)
             try {
                 Path primaryDir = Path.of("config", "waystoneinjector", "ze_voidrobe");
-                Path legacyDir = Path.of("config", "waystoneinjector", "void_closet");
 
                 Files.createDirectories(primaryDir);
 
                 Path primary = primaryDir.resolve(playerId.toString() + ".dat");
-                Path legacy = legacyDir.resolve(playerId.toString() + ".dat");
-
-                migrateIfNeeded(primary, legacy);
-                return new StorageFiles(primary, legacy);
+                return primary;
             } catch (Throwable ignored) {
                 Path primary = Path.of("waystoneinjector_ze_voidrobe_" + playerId + ".dat");
-                Path legacy = Path.of("waystoneinjector_void_closet_" + playerId + ".dat");
-
-                migrateIfNeeded(primary, legacy);
-                return new StorageFiles(primary, legacy);
+                return primary;
             }
-        }
-    }
-
-    private static void migrateIfNeeded(Path primary, Path legacy) {
-        if (primary == null || legacy == null) return;
-        if (Files.exists(primary)) return;
-        if (!Files.exists(legacy)) return;
-
-        try {
-            if (primary.getParent() != null) {
-                Files.createDirectories(primary.getParent());
-            }
-            Files.move(legacy, primary);
-        } catch (Throwable ignored) {
-            // If we can't move, we will still read legacy and later save to primary.
         }
     }
 
     private static final class PersistentContainer extends SimpleContainer {
-        private final StorageFiles files;
+        private final Path file;
 
-        private PersistentContainer(StorageFiles files) {
+        private PersistentContainer(Path file) {
             super(SIZE);
-            this.files = files;
+            this.file = file;
             loadFromDisk();
         }
 
         private void loadFromDisk() {
-            Path primary = files != null ? files.primary() : null;
-            Path legacy = files != null ? files.legacy() : null;
-
-            CompoundTag tag = tryRead(primary);
-            if (tag == null) {
-                tag = tryRead(legacy);
-            }
+            CompoundTag tag = tryRead(this.file);
             if (tag == null) return;
 
             NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
@@ -150,7 +115,7 @@ public final class SingleplayerZeVoidrobe {
         }
 
         private void saveToDisk() {
-            if (files == null) return;
+            if (this.file == null) return;
 
             CompoundTag tag = new CompoundTag();
             NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
@@ -159,11 +124,7 @@ public final class SingleplayerZeVoidrobe {
             }
             ContainerHelper.saveAllItems(tag, items);
 
-            if (tryWrite(tag, files.primary())) {
-                return;
-            }
-            // Last-ditch fallback to legacy path so the player doesn't lose items.
-            tryWrite(tag, files.legacy());
+            tryWrite(tag, this.file);
         }
 
         private boolean tryWrite(CompoundTag tag, Path file) {
