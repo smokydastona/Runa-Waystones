@@ -79,13 +79,21 @@ public class ClientEvents {
     private static void blitAnimatedPortalSheet(GuiGraphics graphics, ResourceLocation texture, int x, int y) {
         int frame = (int) ((System.currentTimeMillis() / PORTAL_FRAME_TIME_MS) % PORTAL_FRAMES);
         int v = frame * PORTAL_FRAME_H;
-        graphics.blit(texture, x, y, 0, 256, 256, 0.0F, (float) v, PORTAL_FRAME_W, PORTAL_FRAME_H, PORTAL_SHEET_W, PORTAL_SHEET_H);
+        graphics.blit(texture, x, y,
+            PORTAL_FRAME_W, PORTAL_FRAME_H,
+            0.0F, (float) v,
+            PORTAL_FRAME_W, PORTAL_FRAME_H,
+            PORTAL_SHEET_W, PORTAL_SHEET_H);
     }
 
     private static void blitAnimatedSharestonePortalSheet(GuiGraphics graphics, ResourceLocation texture, int x, int y) {
         int frame = (int) ((System.currentTimeMillis() / PORTAL_FRAME_TIME_MS) % SHARESTONE_FRAMES);
         int v = frame * SHARESTONE_FRAME_H;
-        graphics.blit(texture, x, y, 0, 256, 256, 0.0F, (float) v, SHARESTONE_FRAME_W, SHARESTONE_FRAME_H, SHARESTONE_SHEET_W, SHARESTONE_SHEET_H);
+        graphics.blit(texture, x, y,
+            256, 256,
+            0.0F, (float) v,
+            SHARESTONE_FRAME_W, SHARESTONE_FRAME_H,
+            SHARESTONE_SHEET_W, SHARESTONE_SHEET_H);
     }
 
     private static ResourceLocation getPortalBackgroundForType(String waystoneType) {
