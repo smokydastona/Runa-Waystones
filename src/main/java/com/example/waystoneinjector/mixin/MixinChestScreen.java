@@ -3,7 +3,6 @@ package com.example.waystoneinjector.mixin;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,8 +18,6 @@ import javax.annotation.Nonnull;
  */
 @Mixin(targets = "net.minecraft.client.gui.screens.inventory.ChestScreen")
 public abstract class MixinChestScreen {
-
-    private static final Component ZE_VOIDROBE_TITLE = Component.literal("Ze Voidrobe+");
 
     private static final @Nonnull ResourceLocation ZE_VOIDROBE_BG = new ResourceLocation(
         "waystoneinjector", "textures/gui/ze_voidrobe.png"
@@ -82,9 +79,8 @@ public abstract class MixinChestScreen {
         String title = screen.getTitle().getString();
         String normalized = title == null ? "" : title.trim();
 
-        boolean isZeVoidrobeTitle = normalized.startsWith("Ze Voidrobe") || normalized.startsWith("Vault");
-        boolean wasRequested = com.example.waystoneinjector.client.ZeVoidrobeOpenTracker.wasRecentlyRequested();
-        if (!isZeVoidrobeTitle && !wasRequested) {
+        // Keep "Vault" support for older servers.
+        if (!normalized.startsWith("Ze Voidrobe") && !normalized.startsWith("Vault")) {
             return;
         }
 
@@ -126,27 +122,6 @@ public abstract class MixinChestScreen {
             ZE_VOIDROBE_TEX_W,
             ZE_VOIDROBE_TEX_H
         );
-
-        // The custom texture may include old title text baked into the PNG.
-        // Cover that area and draw the canonical title so the old name never appears.
-        int titleX = x + 6;
-        int titleY = y + 6;
-        int titleW = 120;
-        int titleH = 12;
-        guiGraphics.fill(titleX - 2, titleY - 2, titleX + titleW, titleY + titleH, 0xCC000000);
-        var mc = Minecraft.getInstance();
-        var font = mc.font;
-        if (font != null) {
-            Component text = ZE_VOIDROBE_TITLE;
-            if (text != null) {
-                guiGraphics.drawString(font, text, titleX, titleY, 0xE0E0E0, false);
-            }
-        }
-
-        // Once we successfully reskin a screen after a user request, clear the request window.
-        if (wasRequested) {
-            com.example.waystoneinjector.client.ZeVoidrobeOpenTracker.clear();
-        }
 
         RenderSystem.disableBlend();
         ci.cancel();

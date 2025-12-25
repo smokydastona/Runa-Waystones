@@ -350,7 +350,6 @@ public class ClientEvents {
                 100L,
                 btn -> {
                     System.out.println("[WaystoneInjector] Ze Voidrobe button clicked");
-                    com.example.waystoneinjector.client.ZeVoidrobeOpenTracker.markRequested();
 
                     Minecraft mc2 = Minecraft.getInstance();
                     if (mc2.hasSingleplayerServer() && mc2.getSingleplayerServer() != null && mc2.player != null) {
