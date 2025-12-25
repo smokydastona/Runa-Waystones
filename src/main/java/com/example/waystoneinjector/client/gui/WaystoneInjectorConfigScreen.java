@@ -49,6 +49,9 @@ public class WaystoneInjectorConfigScreen extends Screen {
     // Special-case: feverdream redirects are a list in TOML.
     private EditBox feverdreamRedirects;
 
+    // Special-case: the Nether Portal page wants a dropdown (not a cycling button).
+    private DropdownButton<NetherPortalVariant> netherPortalVariantDropdown;
+
     public enum Page {
         BUTTONS,
         NETHER_PORTAL,
@@ -99,7 +102,7 @@ public class WaystoneInjectorConfigScreen extends Screen {
             }
             case NETHER_PORTAL -> {
                 addHeader("Nether Portal");
-                addEnumRow(
+                this.netherPortalVariantDropdown = addEnumDropdownRow(
                     "Variant",
                     WaystoneConfig.NETHER_PORTAL_VARIANT.get(),
                     NetherPortalVariant.values(),
@@ -199,10 +202,18 @@ public class WaystoneInjectorConfigScreen extends Screen {
         this.addRenderableWidget(cycle);
     }
 
+    @SuppressWarnings("unused")
     private <T extends Enum<T>> void addEnumRow(String label, T initial, T[] values, java.util.function.Consumer<T> apply) {
         CycleButton<T> cycle = new CycleButton<>(0, 0, 180, 20, values, initial);
         rows.add(Row.withWidget(label, cycle, () -> apply.accept(cycle.value()), currentSection()));
         this.addRenderableWidget(cycle);
+    }
+
+    private <T> DropdownButton<T> addEnumDropdownRow(String label, T initial, T[] values, java.util.function.Consumer<T> apply) {
+        DropdownButton<T> dropdown = new DropdownButton<>(0, 0, 180, 20, values, initial);
+        rows.add(Row.withWidget(label, dropdown, () -> apply.accept(dropdown.value()), currentSection()));
+        this.addRenderableWidget(dropdown);
+        return dropdown;
     }
 
     private String currentSection() {
@@ -284,6 +295,9 @@ public class WaystoneInjectorConfigScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        if (this.netherPortalVariantDropdown != null && this.netherPortalVariantDropdown.mouseScrolled(mouseX, mouseY, delta)) {
+            return true;
+        }
         int viewBottom = this.height - BOTTOM_PADDING;
         if (mouseY < TOP || mouseY > viewBottom) {
             return super.mouseScrolled(mouseX, mouseY, delta);
@@ -566,6 +580,177 @@ public class WaystoneInjectorConfigScreen extends Screen {
                 return null;
             }
             return values[this.index];
+        }
+    }
+
+    private static final class DropdownButton<T> extends net.minecraft.client.gui.components.AbstractWidget {
+        private static final int OPTION_H = 20;
+        private static final int MAX_VISIBLE_OPTIONS = 8;
+
+        private final T[] values;
+        private int index;
+        private boolean open;
+        private int scrollIndex;
+
+        DropdownButton(int x, int y, int w, int h, T[] values, T initial) {
+            super(x, y, w, h, Component.empty());
+            this.values = values;
+            this.index = 0;
+            this.open = false;
+            this.scrollIndex = 0;
+
+            if (values != null) {
+                for (int i = 0; i < values.length; i++) {
+                    if (values[i] != null && values[i].equals(initial)) {
+                        this.index = i;
+                        break;
+                    }
+                }
+            }
+            updateLabel();
+        }
+
+        @Override
+        public void onClick(double mouseX, double mouseY) {
+            if (!this.active || !this.visible) {
+                return;
+            }
+            this.open = !this.open;
+            clampScroll();
+        }
+
+        @Override
+        protected void renderWidget(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            // Render main "closed" button.
+            Button.builder(this.getMessage(), (b) -> {})
+                .bounds(this.getX(), this.getY(), this.width, this.height)
+                .build()
+                .render(graphics, mouseX, mouseY, partialTick);
+
+            if (!this.open) {
+                return;
+            }
+
+            int listX = this.getX();
+            int listY = this.getY() + this.height;
+            int visibleCount = Math.min(values.length, MAX_VISIBLE_OPTIONS);
+            int listH = visibleCount * OPTION_H;
+
+            // Background panel.
+            graphics.fill(listX, listY, listX + this.width, listY + listH, 0xAA000000);
+
+            for (int i = 0; i < visibleCount; i++) {
+                int valIndex = this.scrollIndex + i;
+                if (valIndex < 0 || valIndex >= values.length) {
+                    continue;
+                }
+
+                int itemY0 = listY + i * OPTION_H;
+                int itemY1 = itemY0 + OPTION_H;
+
+                boolean hovered = mouseX >= listX && mouseX < listX + this.width && mouseY >= itemY0 && mouseY < itemY1;
+                boolean selected = valIndex == this.index;
+                if (hovered || selected) {
+                    graphics.fill(listX, itemY0, listX + this.width, itemY1, hovered ? 0x55333333 : 0x55303030);
+                }
+
+                Component text = Component.literal(String.valueOf(values[valIndex]));
+                int color = selected ? 0xFFFFFF : 0xE0E0E0;
+                int textY = itemY0 + (OPTION_H - 8) / 2;
+                graphics.drawCenteredString(Minecraft.getInstance().font, text, listX + this.width / 2, textY, color);
+            }
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (!this.active || !this.visible) {
+                return false;
+            }
+
+            // Click inside the dropdown list selects an option.
+            if (this.open) {
+                int listX = this.getX();
+                int listY = this.getY() + this.height;
+                int visibleCount = Math.min(values.length, MAX_VISIBLE_OPTIONS);
+                int listH = visibleCount * OPTION_H;
+
+                boolean inList = mouseX >= listX && mouseX < listX + this.width && mouseY >= listY && mouseY < listY + listH;
+                if (inList) {
+                    int idxInList = (int) ((mouseY - listY) / OPTION_H);
+                    int picked = this.scrollIndex + idxInList;
+                    if (picked >= 0 && picked < values.length) {
+                        this.index = picked;
+                        updateLabel();
+                    }
+                    this.open = false;
+                    return true;
+                }
+            }
+
+            // Click on main button toggles open/closed.
+            if (mouseX >= this.getX() && mouseX < this.getX() + this.width && mouseY >= this.getY() && mouseY < this.getY() + this.height) {
+                onClick(mouseX, mouseY);
+                return true;
+            }
+
+            // Click outside closes.
+            if (this.open) {
+                this.open = false;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+            if (!this.open || !this.active || !this.visible) {
+                return false;
+            }
+
+            int listX = this.getX();
+            int listY = this.getY() + this.height;
+            int visibleCount = Math.min(values.length, MAX_VISIBLE_OPTIONS);
+            int listH = visibleCount * OPTION_H;
+
+            boolean inList = mouseX >= listX && mouseX < listX + this.width && mouseY >= listY && mouseY < listY + listH;
+            if (!inList) {
+                return false;
+            }
+
+            int maxScroll = Math.max(0, values.length - visibleCount);
+            if (delta > 0) {
+                this.scrollIndex = Math.max(0, this.scrollIndex - 1);
+            } else if (delta < 0) {
+                this.scrollIndex = Math.min(maxScroll, this.scrollIndex + 1);
+            }
+            return true;
+        }
+
+        @Override
+        protected void updateWidgetNarration(net.minecraft.client.gui.narration.NarrationElementOutput narration) {
+            narration.add(net.minecraft.client.gui.narration.NarratedElementType.TITLE, this.getMessage());
+            if (this.open) {
+                narration.add(net.minecraft.client.gui.narration.NarratedElementType.USAGE, Component.literal("Expanded"));
+            }
+        }
+
+        T value() {
+            if (values == null || values.length == 0) {
+                return null;
+            }
+            return values[Math.max(0, Math.min(index, values.length - 1))];
+        }
+
+        private void updateLabel() {
+            T v = value();
+            String text = String.valueOf(v);
+            this.setMessage(Component.literal(text + " ▼"));
+        }
+
+        private void clampScroll() {
+            int visibleCount = Math.min(values.length, MAX_VISIBLE_OPTIONS);
+            int maxScroll = Math.max(0, values.length - visibleCount);
+            if (this.scrollIndex < 0) this.scrollIndex = 0;
+            if (this.scrollIndex > maxScroll) this.scrollIndex = maxScroll;
         }
     }
 
