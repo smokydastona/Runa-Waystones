@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 @SuppressWarnings("null")
 public class EnhancedWaystoneSelectionScreen extends Screen {
 
-    private static final ResourceLocation VOID_CLOSET_BUTTON = new ResourceLocation(
-        "waystoneinjector", "textures/gui/void_closet_button.png"
+    private static final ResourceLocation ZE_VOIDROBE_BUTTON = new ResourceLocation(
+        "waystoneinjector", "textures/gui/ze_voidrobe_button.png"
     );
     
     @SuppressWarnings("unused")
@@ -129,7 +129,7 @@ public class EnhancedWaystoneSelectionScreen extends Screen {
             0,
             0,
             0,
-            VOID_CLOSET_BUTTON,
+            ZE_VOIDROBE_BUTTON,
             20,
             20,
             btn -> com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true),

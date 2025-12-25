@@ -19,8 +19,8 @@ import javax.annotation.Nonnull;
 @Mixin(targets = "net.minecraft.client.gui.screens.inventory.ChestScreen")
 public abstract class MixinChestScreen {
 
-    private static final @Nonnull ResourceLocation VOID_CLOSET_BG = new ResourceLocation(
-        "waystoneinjector", "textures/gui/void_closet.png"
+    private static final @Nonnull ResourceLocation ZE_VOIDROBE_BG = new ResourceLocation(
+        "waystoneinjector", "textures/gui/ze_voidrobe.png"
     );
 
     // Animated portal background (same sprite sheet used behind Waystone menus)
@@ -81,7 +81,7 @@ public abstract class MixinChestScreen {
         int screenH = Minecraft.getInstance().getWindow().getGuiScaledHeight();
 
         // Render portal + mystical movement behind the GUI (matches the Waystones menu vibe).
-        // The void_closet.png should include transparency where you want this to show through.
+        // The ze_voidrobe.png should include transparency where you want this to show through.
         int portalX = (screenW - 256) / 2;
         int portalY = (screenH - 256) / 2;
 
@@ -102,7 +102,7 @@ public abstract class MixinChestScreen {
         int y = (screenH - imageH) / 2;
 
         // The vanilla chest GUI texture is 256x256; we match that convention.
-        guiGraphics.blit(VOID_CLOSET_BG, x, y, 0, 0, imageW, imageH, 256, 256);
+        guiGraphics.blit(ZE_VOIDROBE_BG, x, y, 0, 0, imageW, imageH, 256, 256);
 
         RenderSystem.disableBlend();
         ci.cancel();

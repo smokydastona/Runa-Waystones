@@ -61,8 +61,8 @@ public class ClientEvents {
     private static final ResourceLocation PORTAL_ANIMATION = new ResourceLocation("waystoneinjector", "textures/gui/portal_animation.png");
     private static final ResourceLocation PORTSTONE_PORTAL = new ResourceLocation("waystoneinjector", "textures/gui/portstone_portal.png");
 
-    private static final ResourceLocation VOID_CLOSET_BUTTON = new ResourceLocation(
-        "waystoneinjector", "textures/gui/void_closet_button.png"
+    private static final ResourceLocation ZE_VOIDROBE_BUTTON = new ResourceLocation(
+        "waystoneinjector", "textures/gui/ze_voidrobe_button.png"
     );
 
     private static final int PORTAL_FRAME_W = 256;
@@ -346,7 +346,7 @@ public class ClientEvents {
                 0,
                 0,
                 0,
-                VOID_CLOSET_BUTTON,
+                ZE_VOIDROBE_BUTTON,
                 20,
                 20,
                 btn -> {
@@ -354,7 +354,7 @@ public class ClientEvents {
 
                     Minecraft mc2 = Minecraft.getInstance();
                     if (mc2.hasSingleplayerServer() && mc2.getSingleplayerServer() != null && mc2.player != null) {
-                        com.example.waystoneinjector.singleplayer.SingleplayerVoidCloset.open(
+                        com.example.waystoneinjector.singleplayer.SingleplayerZeVoidrobe.open(
                             mc2.getSingleplayerServer(),
                             mc2.player.getUUID()
                         );
