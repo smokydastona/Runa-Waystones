@@ -82,7 +82,7 @@ public final class ServerSideNetwork {
         if (!isServerSideModPresent()) {
             if (chatIfUnavailable) {
                 //noinspection ConstantConditions
-                player.sendSystemMessage(Component.literal("Vault server mod not installed on this server."));
+                player.sendSystemMessage(Component.literal("Void Closet server mod not installed on this server."));
             }
             return;
         }

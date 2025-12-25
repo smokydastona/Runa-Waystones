@@ -6,8 +6,10 @@ import com.example.waystoneinjector.client.gui.widget.WaystoneSearchField;
 import com.example.waystoneinjector.config.WaystoneConfig;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -22,6 +24,10 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("null")
 public class EnhancedWaystoneSelectionScreen extends Screen {
+
+    private static final ResourceLocation VOID_CLOSET_BUTTON = new ResourceLocation(
+        "waystoneinjector", "textures/gui/void_closet_button.png"
+    );
     
     @SuppressWarnings("unused")
     private final Screen originalScreen;
@@ -109,6 +115,26 @@ public class EnhancedWaystoneSelectionScreen extends Screen {
         ).bounds(this.width / 2 - 50, this.height - 30, 100, 20).build();
         
         this.addRenderableWidget(closeButton);
+
+        // Add a small icon button to open the Void Closet (server-side storage) when available.
+        // This is client-safe: the request no-ops with a friendly message if the server mod isn't present.
+        int iconSize = 20;
+        int iconX = this.width / 2 - 50 - 6 - iconSize;
+        int iconY = this.height - 30;
+        this.addRenderableWidget(new ImageButton(
+            iconX,
+            iconY,
+            iconSize,
+            iconSize,
+            0,
+            0,
+            0,
+            VOID_CLOSET_BUTTON,
+            20,
+            20,
+            btn -> com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true),
+            Component.literal("Open Void Closet")
+        ));
         
         // Add custom buttons from config
         addCustomButtons();
