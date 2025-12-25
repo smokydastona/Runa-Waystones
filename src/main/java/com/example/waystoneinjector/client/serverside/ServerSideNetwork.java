@@ -59,22 +59,29 @@ public final class ServerSideNetwork {
 
     public static boolean isServerSideModPresent() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.getConnection() == null) {
+        var packetListener = mc.getConnection();
+        if (packetListener == null) {
             return false;
         }
-        Connection connection = mc.getConnection().getConnection();
+
+        Connection connection = packetListener.getConnection();
+        if (connection == null) {
+            return false;
+        }
         return CHANNEL.isRemotePresent(connection);
     }
 
     public static void requestOpenVault(boolean chatIfUnavailable) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) {
+        var player = mc.player;
+        if (player == null) {
             return;
         }
 
         if (!isServerSideModPresent()) {
             if (chatIfUnavailable) {
-                mc.player.sendSystemMessage(Component.literal("Vault server mod not installed on this server."));
+                //noinspection ConstantConditions
+                player.sendSystemMessage(Component.literal("Vault server mod not installed on this server."));
             }
             return;
         }
