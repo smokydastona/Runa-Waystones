@@ -95,8 +95,6 @@ public abstract class MixinChestScreen {
             guiGraphics.blit(mystical, portalX, portalY, 0, 0, 256, 256, 256, 256);
         }
 
-        RenderSystem.disableBlend();
-
         // ChestScreen uses the standard 6-row chest layout (176x222) for our storage.
         int imageW = 176;
         int imageH = 222;
@@ -105,6 +103,8 @@ public abstract class MixinChestScreen {
 
         // The vanilla chest GUI texture is 256x256; we match that convention.
         guiGraphics.blit(VOID_CLOSET_BG, x, y, 0, 0, imageW, imageH, 256, 256);
+
+        RenderSystem.disableBlend();
         ci.cancel();
     }
 }
