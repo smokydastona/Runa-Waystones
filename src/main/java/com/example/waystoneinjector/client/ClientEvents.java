@@ -65,9 +65,6 @@ public class ClientEvents {
         "waystoneinjector", "textures/gui/void_closet_button.png"
     );
 
-    private static final long VOID_CLOSET_CHAT_COOLDOWN_MS = 3000L;
-    private static long lastVoidClosetChatMs = 0L;
-
     private static final int PORTAL_FRAME_W = 256;
     private static final int PORTAL_FRAME_H = 256;
     private static final int PORTAL_SHEET_W = 256;
@@ -316,6 +313,11 @@ public class ClientEvents {
 
     private static void addVoidClosetButton(Screen screen, ScreenEvent.Init.Post event) {
         try {
+            // Client must be fully standalone: only show this button when the server-side mod is present.
+            if (!com.example.waystoneinjector.client.serverside.ServerSideNetwork.isServerSideModPresent()) {
+                return;
+            }
+
             int iconSize = 20;
             int iconX = screen.width / 2 - 50 - 6 - iconSize;
             int iconY = screen.height - 30;
@@ -345,23 +347,6 @@ public class ClientEvents {
                 20,
                 btn -> {
                     System.out.println("[WaystoneInjector] Void Closet button clicked");
-
-                    // Avoid chat spam: only notify occasionally when unavailable.
-                    if (!com.example.waystoneinjector.client.serverside.ServerSideNetwork.isServerSideModPresent()) {
-                        long now = System.currentTimeMillis();
-                        if (now - lastVoidClosetChatMs >= VOID_CLOSET_CHAT_COOLDOWN_MS) {
-                            lastVoidClosetChatMs = now;
-                            Minecraft mc = Minecraft.getInstance();
-                            if (mc.player != null) {
-                                mc.player.sendSystemMessage(Component.literal(
-                                    "Void Closet is unavailable: server mod not installed on this server."
-                                ));
-                            }
-                        }
-                        return;
-                    }
-
-                    // Server mod is present; send request without extra chat.
                     com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(false);
                 },
                 Component.literal("Open Void Closet")
