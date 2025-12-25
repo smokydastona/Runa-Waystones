@@ -99,6 +99,9 @@ public class WaystoneConfig {
     public static final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> FEVERDREAM_REDIRECTS;
     public static final ForgeConfigSpec.IntValue FEVERDREAM_DEATH_COUNT;
 
+    // Nether portal texture override (client-side resource pack selection)
+    public static final ForgeConfigSpec.ConfigValue<String> NETHER_PORTAL_VARIANT;
+
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
@@ -362,6 +365,22 @@ public class WaystoneConfig {
         BUTTON6_DEATH_REDIRECT = builder.define("deathRedirect", "");
         BUTTON6_SLEEP_REDIRECT = builder.define("sleepRedirect", "");
         BUTTON6_SLEEP_CHANCE = builder.defineInRange("sleepChance", 100, 0, 100);
+        builder.pop();
+
+        // Nether Portal Texture Override
+        builder.push("netherPortal");
+        builder.comment(
+            "Client-side override for the vanilla nether portal block texture.",
+            "This works by enabling a built-in resource pack shipped with the mod.",
+            "",
+            "Set to one of: off, black, blue, brown, cyan, gray, green, light_blue, light_gray,",
+            "             lime, magenta, orange, pink, purple, red, white, yellow",
+            "",
+            "Note: You may need to re-open the world or reload resources after changing this."
+        );
+        NETHER_PORTAL_VARIANT = builder
+            .comment("Which nether portal texture variant to use")
+            .define("variant", "off");
         builder.pop();
         
         // Feverdream Integration Settings (Built-in Death/Sleep Detection)

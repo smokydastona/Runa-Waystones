@@ -36,6 +36,11 @@ public class WaystoneInjectorMod {
             IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
             modBus.addListener(com.example.waystoneinjector.client.KeybindHandler::onRegisterKeyMappings);
             LOGGER.debug("KeybindHandler registered");
+
+            // Register built-in resource pack finders (nether portal texture variants)
+            LOGGER.debug("Registering NetherPortalResourcePacks");
+            modBus.addListener(com.example.waystoneinjector.client.NetherPortalResourcePacks::onAddPackFinders);
+            LOGGER.debug("NetherPortalResourcePacks registered");
             
             // Register built-in death and sleep event handlers (client-side detection)
             LOGGER.debug("Registering DeathSleepEvents");
@@ -51,6 +56,11 @@ public class WaystoneInjectorMod {
             LOGGER.debug("Registering ServerSettingsManager");
             net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(com.example.waystoneinjector.client.ServerSettingsManager.class);
             LOGGER.debug("ServerSettingsManager registered");
+
+            // Apply configured nether portal resource pack selection
+            LOGGER.debug("Registering NetherPortalPackApplier");
+            net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(com.example.waystoneinjector.client.NetherPortalPackApplier.class);
+            LOGGER.debug("NetherPortalPackApplier registered");
 
             LOGGER.info("{} initialization complete", MODID);
         } else {
