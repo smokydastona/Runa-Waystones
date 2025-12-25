@@ -1,6 +1,7 @@
 package com.example.waystoneinjector.client.gui.widget;
 
 import com.example.waystoneinjector.client.gui.GuiThemeAtlas;
+import com.example.waystoneinjector.client.serverside.ServerIconCache;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
@@ -188,6 +189,17 @@ public class ThemedButton extends Button {
                     String targetHost = hostPart(serverAddress);
                     String currentHost = hostPart(currentNorm);
                     if (!targetHost.isEmpty() && targetHost.equalsIgnoreCase(currentHost)) {
+                        // Prefer server-provided icon bytes (works even if the server isn't in the local server list).
+                        byte[] serverProvided = ServerIconCache.get();
+                        if (serverProvided != null && serverProvided.length > 0) {
+                            ResourceLocation icon = registerFaviconTextureIfPresent(mc, normalizedKey, serverProvided);
+                            if (icon != null) {
+                                SERVER_ICON_CACHE.put(normalizedKey, icon);
+                                serverIcon = icon;
+                                return;
+                            }
+                        }
+
                         String iconB64 = getServerIconB64(current);
                         ResourceLocation icon = registerFaviconTextureIfPresent(mc, normalizedKey, iconB64);
                         if (icon != null) {
@@ -283,6 +295,33 @@ public class ThemedButton extends Button {
             }
 
             // Vanilla expects 64x64 favicons. If it's some other size, just skip.
+            if (image.getWidth() != 64 || image.getHeight() != 64) {
+                image.close();
+                return null;
+            }
+
+            String id = "server_icons/" + sha1Hex(normalizedKey);
+            ResourceLocation iconId = new ResourceLocation("waystoneinjector", id);
+
+            TextureManager textures = mc.getTextureManager();
+            textures.register(iconId, new DynamicTexture(image));
+            return iconId;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private static ResourceLocation registerFaviconTextureIfPresent(Minecraft mc, String normalizedKey, byte[] pngBytes) {
+        if (pngBytes == null || pngBytes.length == 0) {
+            return null;
+        }
+
+        try {
+            NativeImage image;
+            try (ByteArrayInputStream in = new ByteArrayInputStream(pngBytes)) {
+                image = NativeImage.read(in);
+            }
+
             if (image.getWidth() != 64 || image.getHeight() != 64) {
                 image.close();
                 return null;
