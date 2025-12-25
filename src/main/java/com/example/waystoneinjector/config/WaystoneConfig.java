@@ -105,9 +105,9 @@ public class WaystoneConfig {
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
-        builder.comment("═══════════════════════════════════════════════════════════════════════════════",
-                        "  Waystone Button Injector - Client Configuration",
-                        "═══════════════════════════════════════════════════════════════════════════════",
+        builder.comment("=======================================================================",
+                "  Waystone Button Injector - Client Configuration",
+                "=======================================================================",
                         "",
                         "QUICK START GUIDE:",
                         "  1. Enable a button: Set 'enabled = true'",
@@ -115,9 +115,9 @@ public class WaystoneConfig {
                         "  3. Set command: Use 'redirect @s server.ip:port' OR any server command",
                         "  4. Customize appearance (optional): width, height, position, color",
                         "",
-                        "═══════════════════════════════════════════════════════════════════════════════",
+                "=======================================================================",
                         "  COMPLETE BUTTON EXAMPLE",
-                        "═══════════════════════════════════════════════════════════════════════════════",
+                "=======================================================================",
                         "",
                         "[button1]",
                         "    # Turn this button ON",
@@ -153,24 +153,24 @@ public class WaystoneConfig {
                         "    # Sleep redirect chance (0-100%, only applies if sleepRedirect is set)",
                         "    sleepChance = 100",
                         "",
-                        "═══════════════════════════════════════════════════════════════════════════════",
+                        "=======================================================================",
                         "  COMMON COLOR CODES FOR LABELS",
-                        "═══════════════════════════════════════════════════════════════════════════════",
+                        "=======================================================================",
                         "  &0 = Black    &1 = Dark Blue   &2 = Dark Green   &3 = Dark Aqua",
                         "  &4 = Dark Red &5 = Dark Purple &6 = Gold         &7 = Gray",
                         "  &8 = Dark Gray &9 = Blue       &a = Green        &b = Aqua",
                         "  &c = Red      &d = Light Purple &e = Yellow      &f = White",
                         "  &l = Bold     &o = Italic      &n = Underline    &r = Reset",
                         "",
-                        "═══════════════════════════════════════════════════════════════════════════════",
+                        "=======================================================================",
                         "  COMMON TEXT COLORS (HEX)",
-                        "═══════════════════════════════════════════════════════════════════════════════",
+                        "=======================================================================",
                         "  0xFFFFFF = White     0xFF0000 = Red        0x00FF00 = Green",
                         "  0x0000FF = Blue      0xFFFF00 = Yellow     0xFF00FF = Magenta",
                         "  0x00FFFF = Cyan      0xFFA500 = Orange     0x800080 = Purple",
                         "  0xFFD700 = Gold      0xC0C0C0 = Silver     0x808080 = Gray",
                         "",
-                        "═══════════════════════════════════════════════════════════════════════════════");
+                        "=======================================================================");
         
         // ═══════════════════════════════════════════════════════════════════════════════
         // Button 1 - Configure your first custom button here!
@@ -178,9 +178,9 @@ public class WaystoneConfig {
         builder.push("button1");
         
         builder.comment("",
-                        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-                        "  BUTTON 1 CONFIGURATION",
-                        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                "-----------------------------------------------------------------------",
+                "  BUTTON 1 CONFIGURATION",
+                "-----------------------------------------------------------------------");
         
         BUTTON1_ENABLED = builder
                 .comment("",
@@ -199,9 +199,9 @@ public class WaystoneConfig {
                 .define("command", "");
         
         builder.comment("",
-                        "────────────────────────────────────────────────────────────────────────────────",
-                        "  Appearance Settings (Optional - leave as default if unsure)",
-                        "────────────────────────────────────────────────────────────────────────────────");
+                "-----------------------------------------------------------------------",
+                "  Appearance Settings (Optional - leave as default if unsure)",
+                "-----------------------------------------------------------------------");
         
         BUTTON1_WIDTH = builder
                 .comment("Button width in pixels (20-200)")
@@ -216,9 +216,9 @@ public class WaystoneConfig {
                 .define("textColor", "0xFFFFFF");
         
         builder.comment("",
-                        "────────────────────────────────────────────────────────────────────────────────",
-                        "  Position Settings (Optional)",
-                        "────────────────────────────────────────────────────────────────────────────────");
+                "-----------------------------------------------------------------------",
+                "  Position Settings (Optional)",
+                "-----------------------------------------------------------------------");
         
         BUTTON1_SIDE = builder
                 .comment("Placement: 'auto' (balanced), 'left' (force left side), 'right' (force right side)")
@@ -238,10 +238,10 @@ public class WaystoneConfig {
                 .defineInRange("yOffset", 0, -500, 500);
         
         builder.comment("",
-                        "────────────────────────────────────────────────────────────────────────────────",
-                        "  Automatic Events - Triggered when you're ON this button's server",
-                        "  (The mod auto-detects which server matches this button's 'command')",
-                        "────────────────────────────────────────────────────────────────────────────────");
+                "-----------------------------------------------------------------------",
+                "  Automatic Events - Triggered when you're ON this button's server",
+                "  (The mod auto-detects which server matches this button's 'command')",
+                "-----------------------------------------------------------------------");
         
         BUTTON1_DEATH_REDIRECT = builder
                 .comment("When you DIE while connected to THIS button's server, run this command",
@@ -263,9 +263,9 @@ public class WaystoneConfig {
         // ═══════════════════════════════════════════════════════════════════════════════
         builder.push("button2");
         builder.comment("",
-                        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-                        "  BUTTON 2 CONFIGURATION",
-                        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                "-----------------------------------------------------------------------",
+                "  BUTTON 2 CONFIGURATION",
+                "-----------------------------------------------------------------------");
         BUTTON2_ENABLED = builder.define("enabled", false);
         BUTTON2_LABEL = builder.define("label", "Button 2");
         BUTTON2_COMMAND = builder.define("command", "");

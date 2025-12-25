@@ -5,6 +5,7 @@ import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -38,6 +39,23 @@ public class WaystoneInjectorMod {
             // Register keybind handler (Forge bus for tick + Mod bus for key registration)
             LOGGER.debug("Registering KeybindHandler");
             IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+            // Log config load/reload so we can confirm the file is being read.
+            modBus.addListener((ModConfigEvent.Loading e) -> {
+                if (e.getConfig().getSpec() == WaystoneConfig.SPEC) {
+                    LOGGER.info("Loaded client config: button1.enabled={} netherPortal.variant={}",
+                        WaystoneConfig.BUTTON1_ENABLED.get(),
+                        WaystoneConfig.NETHER_PORTAL_VARIANT.get());
+                }
+            });
+            modBus.addListener((ModConfigEvent.Reloading e) -> {
+                if (e.getConfig().getSpec() == WaystoneConfig.SPEC) {
+                    LOGGER.info("Reloaded client config: button1.enabled={} netherPortal.variant={}",
+                        WaystoneConfig.BUTTON1_ENABLED.get(),
+                        WaystoneConfig.NETHER_PORTAL_VARIANT.get());
+                }
+            });
+
             modBus.addListener(com.example.waystoneinjector.client.KeybindHandler::onRegisterKeyMappings);
             LOGGER.debug("KeybindHandler registered");
 
