@@ -380,7 +380,7 @@ public class WaystoneConfig {
         );
         NETHER_PORTAL_VARIANT = builder
             .comment("Which nether portal texture variant to use")
-            .define("variant", "off");
+            .define("variant", "black");
         builder.pop();
         
         // Feverdream Integration Settings (Built-in Death/Sleep Detection)
