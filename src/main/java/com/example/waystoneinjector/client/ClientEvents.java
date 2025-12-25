@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -59,6 +60,10 @@ public class ClientEvents {
     // Animated portal background for waystone GUIs
     private static final ResourceLocation PORTAL_ANIMATION = new ResourceLocation("waystoneinjector", "textures/gui/portal_animation.png");
     private static final ResourceLocation PORTSTONE_PORTAL = new ResourceLocation("waystoneinjector", "textures/gui/portstone_portal.png");
+
+    private static final ResourceLocation VOID_CLOSET_BUTTON = new ResourceLocation(
+        "waystoneinjector", "textures/gui/void_closet_button.png"
+    );
 
     private static final int PORTAL_FRAME_W = 256;
     private static final int PORTAL_FRAME_H = 256;
@@ -288,6 +293,9 @@ public class ClientEvents {
             // Add custom server transfer buttons
             System.out.println("[WaystoneInjector] ✓ Adding custom buttons...");
             addCustomButtons(screen, event);
+
+            // Add Void Closet icon button (GUI button only; no keybind)
+            addVoidClosetButton(screen, event);
             
             // Add search box enhancement
             addSearchBoxEnhancement(screen);
@@ -300,6 +308,35 @@ public class ClientEvents {
         } catch (Exception e) {
             System.err.println("[WaystoneInjector] ERROR in onScreenInit: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private static void addVoidClosetButton(Screen screen, ScreenEvent.Init.Post event) {
+        try {
+            // Match the enhanced menu placement: left of the bottom-center Close button.
+            int iconSize = 20;
+            int iconX = screen.width / 2 - 50 - 6 - iconSize;
+            int iconY = screen.height - 30;
+
+            ImageButton button = new ImageButton(
+                iconX,
+                iconY,
+                iconSize,
+                iconSize,
+                0,
+                0,
+                0,
+                VOID_CLOSET_BUTTON,
+                20,
+                20,
+                btn -> com.example.waystoneinjector.client.serverside.ServerSideNetwork.requestOpenVault(true),
+                Component.literal("Open Void Closet")
+            );
+
+            event.addListener(button);
+            System.out.println("[WaystoneInjector] ✓ Added Void Closet icon button");
+        } catch (Exception e) {
+            System.err.println("[WaystoneInjector] ✗ Failed to add Void Closet icon button: " + e.getMessage());
         }
     }
     
