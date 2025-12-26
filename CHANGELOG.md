@@ -4,6 +4,18 @@ All notable changes to the Waystone Button Injector mod will be documented in th
 
 > Note: Mod version numbers are auto-generated from git (see `build.gradle`). Starting at `4.0.0`, the patch number is the number of commits since the 4.0.0 bump.
 
+## [4.0.x] - 2025-12-25
+
+### Added
+- Nether Portal variant selector now uses a dropdown list so all colors are visible at once
+
+### Changed
+- Ze Voidrobe naming fully replaces the old "Void Closet" label (including legacy references)
+
+### Fixed
+- Ze Voidrobe ChestScreen background now reliably uses the custom `ze_voidrobe.png` texture instead of the vanilla chest background
+- Updated Ze Voidrobe button texture assets
+
 ## [4.0.0] - 2025-12-21
 
 ### Changed
