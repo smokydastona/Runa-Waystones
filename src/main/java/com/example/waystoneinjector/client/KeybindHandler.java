@@ -569,7 +569,6 @@ public final class KeybindHandler {
 
         try {
             // Some Forge nullness annotations declare a @Nonnull Player parameter; the local player is non-null here.
-            @SuppressWarnings("null")
             Player nonNullPlayer = Objects.requireNonNull(player, "player");
 
             gameMode.handleInventoryMouseClick(menu.containerId, a, 0, ClickType.PICKUP, nonNullPlayer);
@@ -601,9 +600,7 @@ public final class KeybindHandler {
         if (mc.screen != null) return;
 
         // Forge nullness annotations may declare @Nonnull parameters.
-        @SuppressWarnings("null")
         Player nonNullPlayer = Objects.requireNonNull(player, "player");
-        @SuppressWarnings("null")
         InteractionHand nonNullHand = Objects.requireNonNull(hand, "hand");
         gameMode.useItem(nonNullPlayer, nonNullHand);
     }
