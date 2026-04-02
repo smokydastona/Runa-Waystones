@@ -74,6 +74,39 @@ function Write-LangJsonOrdered {
 	[System.IO.File]::WriteAllText($Path, $json, (New-Object System.Text.UTF8Encoding($false)))
 }
 
+function Test-LangJsonMatchesOrdered {
+	param(
+		[System.Collections.IDictionary]$Existing,
+		[System.Collections.IDictionary]$Expected
+	)
+
+	if ($null -eq $Existing) {
+		return $false
+	}
+
+	$existingKeys = @($Existing.Keys)
+	$expectedKeys = @($Expected.Keys)
+
+	if ($existingKeys.Count -ne $expectedKeys.Count) {
+		return $false
+	}
+
+	for ($index = 0; $index -lt $expectedKeys.Count; $index++) {
+		$key = [string]$expectedKeys[$index]
+		if ([string]$existingKeys[$index] -ne $key) {
+			return $false
+		}
+		if (-not $Existing.Contains($key)) {
+			return $false
+		}
+		if ([string]$Existing[$key] -ne [string]$Expected[$key]) {
+			return $false
+		}
+	}
+
+	return $true
+}
+
 function Test-TranslationGateExempt {
 	param([string]$Locale)
 	if ($Locale -match '^en_') { return $true }
@@ -117,6 +150,7 @@ foreach ($master in $masters) {
 
 	foreach ($locale in $supportedLocales) {
 		$localeFile = $localeByCode[$locale]
+		$existingMap = $null
 		if ($null -eq $localeFile) {
 			$localeFilePath = Join-Path $langDir ($locale + '.json')
 			$localeMap = [ordered]@{}
@@ -126,6 +160,7 @@ foreach ($master in $masters) {
 		} else {
 			$localeFilePath = $localeFile.FullName
 			$localeMap = Read-LangJsonOrdered -Path $localeFilePath
+			$existingMap = $localeMap
 		}
 
 		$newMap = [ordered]@{}
@@ -137,18 +172,7 @@ foreach ($master in $masters) {
 			}
 		}
 
-		$tmpPath = Join-Path ([System.IO.Path]::GetTempPath()) ("lang_sync_{0}_{1}.json" -f $locale, [System.Guid]::NewGuid().ToString('N'))
-		Write-LangJsonOrdered -Path $tmpPath -Object $newMap
-		$newText = Get-Content -LiteralPath $tmpPath -Raw -Encoding UTF8
-		Remove-Item -LiteralPath $tmpPath -Force
-
-		$oldText = if (Test-Path -LiteralPath $localeFilePath) {
-			Get-Content -LiteralPath $localeFilePath -Raw -Encoding UTF8
-		} else {
-			$null
-		}
-
-		if ($oldText -ne $newText) {
+		if (-not (Test-LangJsonMatchesOrdered -Existing $existingMap -Expected $newMap)) {
 			$rewritesNeeded.Add($localeFilePath) | Out-Null
 			if (-not $Check) {
 				Write-LangJsonOrdered -Path $localeFilePath -Object $newMap
