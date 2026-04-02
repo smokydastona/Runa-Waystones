@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "ปุ่ม 1",
+    "waystoneinjector.button.undergrown":  "ปุ่ม 2",
+    "key.categories.waystoneinjector":  "ตัวฉีดปุ่ม Waystone",
+    "key.waystoneinjector.use_teleport_item":  "ใช้ไอเทมวาร์ปของ Waystones"
 }

@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "बटन 1",
+    "waystoneinjector.button.undergrown":  "बटन 2",
+    "key.categories.waystoneinjector":  "Waystone बटन इंजेक्टर",
+    "key.waystoneinjector.use_teleport_item":  "Waystones टेलीपोर्ट आइटम का उपयोग करें"
 }

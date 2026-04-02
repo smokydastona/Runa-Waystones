@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "பொத்தான் 1",
+    "waystoneinjector.button.undergrown":  "பொத்தான் 2",
+    "key.categories.waystoneinjector":  "Waystone பொத்தான் செலுத்தி",
+    "key.waystoneinjector.use_teleport_item":  "Waystones டெலிபோர்ட் பொருளைப் பயன்படுத்து"
 }

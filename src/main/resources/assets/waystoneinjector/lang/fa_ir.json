@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "دکمه 1",
+    "waystoneinjector.button.undergrown":  "دکمه 2",
+    "key.categories.waystoneinjector":  "تزریق‌کننده دکمه Waystone",
+    "key.waystoneinjector.use_teleport_item":  "از آیتم تله‌پورت Waystones استفاده کن"
 }

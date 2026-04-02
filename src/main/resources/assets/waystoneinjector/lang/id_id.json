@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "Tombol 1",
+    "waystoneinjector.button.undergrown":  "Tombol 2",
+    "key.categories.waystoneinjector":  "Injektor tombol Waystone",
+    "key.waystoneinjector.use_teleport_item":  "Gunakan item teleport Waystones"
 }

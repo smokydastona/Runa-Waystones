@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "Knoop 1",
+    "waystoneinjector.button.undergrown":  "Knoop 2",
+    "key.categories.waystoneinjector":  "Waystone-Knoop-Injekschoor",
+    "key.waystoneinjector.use_teleport_item":  "Benotz dat Teleport-Ding vun Waystones"
 }

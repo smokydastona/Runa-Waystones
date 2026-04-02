@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "Баскыч 1",
+    "waystoneinjector.button.undergrown":  "Баскыч 2",
+    "key.categories.waystoneinjector":  "Waystone баскыч инжектору",
+    "key.waystoneinjector.use_teleport_item":  "Waystones телепорт буюмун колдон"
 }

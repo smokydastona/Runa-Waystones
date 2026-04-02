@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "קנעפּל 1",
+    "waystoneinjector.button.undergrown":  "קנעפּל 2",
+    "key.categories.waystoneinjector":  "Waystone קנעפּל אינזשעקטאָר",
+    "key.waystoneinjector.use_teleport_item":  "ניץ דעם Waystones טעלעפּאָרט-אייטעם"
 }

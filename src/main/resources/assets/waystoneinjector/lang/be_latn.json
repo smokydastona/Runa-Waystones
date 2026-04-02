@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "Knopka 1",
+    "waystoneinjector.button.undergrown":  "Knopka 2",
+    "key.categories.waystoneinjector":  "Inžektar knopak Waystone",
+    "key.waystoneinjector.use_teleport_item":  "Vykarystać pradmiet teleportacyi Waystones"
 }

@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "ボタン 1",
+    "waystoneinjector.button.undergrown":  "ボタン 2",
+    "key.categories.waystoneinjector":  "Waystone ボタンインジェクター",
+    "key.waystoneinjector.use_teleport_item":  "Waystones のテレポートアイテムを使う"
 }

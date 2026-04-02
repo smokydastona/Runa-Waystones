@@ -2,15 +2,12 @@
 param(
 	[switch]$Check,
 	[string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path,
-	[double]$EnglishFallbackThreshold = 0.90
+	[double]$EnglishFallbackThreshold = 0.90,
+	[string]$LocaleManifestPath = (Join-Path $PSScriptRoot 'minecraft-1.20.1-locales.json')
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-
-if ($PSVersionTable.PSVersion.Major -lt 7) {
-	throw "sync_lang_files.ps1 requires PowerShell 7+ (pwsh). Install from https://learn.microsoft.com/powershell/ and rerun with 'pwsh -File ./tools/sync_lang_files.ps1'."
-}
 
 # Locales that are exempt from the translation-coverage gate.
 # - English variants (en_*) are exempt by default.
@@ -27,8 +24,23 @@ function Get-LangMasters {
 	Get-ChildItem -Path $SearchRoot -Recurse -File -Filter 'en_us.json' |
 		Where-Object {
 			$full = $_.FullName -replace '\\', '/'
-			$full -match '/lang/en_us\.json$'
+			$full -match '/src/main/resources/' -and $full -match '/lang/en_us\.json$'
 		}
+}
+
+function Get-SupportedLocales {
+	param([string]$ManifestPath)
+
+	if (-not (Test-Path -LiteralPath $ManifestPath)) {
+		throw "Locale manifest not found: ${ManifestPath}"
+	}
+
+	$manifest = Get-Content -LiteralPath $ManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+	if (-not $manifest.locales) {
+		throw "Locale manifest is missing the 'locales' array: ${ManifestPath}"
+	}
+
+	return @($manifest.locales | ForEach-Object { [string]$_ } | Sort-Object -Unique)
 }
 
 function Read-LangJsonOrdered {
@@ -36,24 +48,19 @@ function Read-LangJsonOrdered {
 
 	$text = Get-Content -LiteralPath $Path -Raw -Encoding UTF8
 	try {
-		$doc = [System.Text.Json.JsonDocument]::Parse($text)
+		$doc = $text | ConvertFrom-Json
 	} catch {
-		throw "Invalid JSON in $Path: $($_.Exception.Message)"
-	}
-
-	if ($doc.RootElement.ValueKind -ne [System.Text.Json.JsonValueKind]::Object) {
-		throw "Expected top-level JSON object in $Path"
+		throw "Invalid JSON in ${Path}: $($_.Exception.Message)"
 	}
 
 	$ordered = [ordered]@{}
-	foreach ($prop in $doc.RootElement.EnumerateObject()) {
-		if ($prop.Value.ValueKind -ne [System.Text.Json.JsonValueKind]::String) {
+	foreach ($prop in $doc.PSObject.Properties) {
+		if ($null -eq $prop.Value -or $prop.Value -isnot [string]) {
 			throw "Non-string value for key '$($prop.Name)' in $Path. Lang values must be strings."
 		}
-		$ordered[$prop.Name] = $prop.Value.GetString()
+		$ordered[$prop.Name] = [string]$prop.Value
 	}
 
-	$doc.Dispose()
 	return $ordered
 }
 
@@ -63,29 +70,11 @@ function Write-LangJsonOrdered {
 		[Parameter(Mandatory=$true)][System.Collections.IDictionary]$Object
 	)
 
-	$options = [System.Text.Json.JsonWriterOptions]::new()
-	$options.Indented = $true
-	$options.Encoder = [System.Text.Encodings.Web.JavaScriptEncoder]::UnsafeRelaxedJsonEscaping
-
-	$stream = New-Object System.IO.MemoryStream
-	$writer = [System.Text.Json.Utf8JsonWriter]::new($stream, $options)
-
-	$writer.WriteStartObject()
-	foreach ($key in $Object.Keys) {
-		$writer.WriteString([string]$key, [string]$Object[$key])
-	}
-	$writer.WriteEndObject()
-	$writer.Flush()
-	$writer.Dispose()
-
-	# Ensure trailing newline and UTF-8 without BOM.
-	$bytes = $stream.ToArray()
-	$stream.Dispose()
-	$json = [System.Text.Encoding]::UTF8.GetString($bytes) + "`n"
+	$json = ($Object | ConvertTo-Json -Depth 5) + "`n"
 	[System.IO.File]::WriteAllText($Path, $json, (New-Object System.Text.UTF8Encoding($false)))
 }
 
-function Is-TranslationGateExempt {
+function Test-TranslationGateExempt {
 	param([string]$Locale)
 	if ($Locale -match '^en_') { return $true }
 	return $translationGateExempt.Contains($Locale)
@@ -96,6 +85,11 @@ function Get-LocaleFromFileName {
 	return [System.IO.Path]::GetFileNameWithoutExtension($File.Name)
 }
 
+$supportedLocales = @(Get-SupportedLocales -ManifestPath $LocaleManifestPath)
+if ($supportedLocales.Count -eq 0) {
+	throw "No supported locales were loaded from $LocaleManifestPath"
+}
+
 $masters = @(Get-LangMasters -SearchRoot $Root)
 if ($masters.Count -eq 0) {
 	Write-Host "No lang/en_us.json masters found under '$Root'. Nothing to do."
@@ -104,6 +98,7 @@ if ($masters.Count -eq 0) {
 
 $rewritesNeeded = New-Object System.Collections.Generic.List[string]
 $translationGateFailures = New-Object System.Collections.Generic.List[string]
+$unsupportedLocaleFiles = New-Object System.Collections.Generic.List[string]
 
 foreach ($master in $masters) {
 	$langDir = $master.Directory.FullName
@@ -111,15 +106,28 @@ foreach ($master in $masters) {
 	$enKeys = @($enUs.Keys)
 
 	$localeFiles = @(Get-ChildItem -LiteralPath $langDir -File -Filter '*.json' | Sort-Object Name)
-	if ($localeFiles.Count -eq 0) {
-		continue
-	}
-
+	$localeByCode = @{}
 	foreach ($localeFile in $localeFiles) {
 		$locale = Get-LocaleFromFileName -File $localeFile
-		$localeMap = Read-LangJsonOrdered -Path $localeFile.FullName
+		$localeByCode[$locale] = $localeFile
+		if ($supportedLocales -notcontains $locale) {
+			$unsupportedLocaleFiles.Add($localeFile.FullName) | Out-Null
+		}
+	}
 
-		# Build canonical locale object with master key order.
+	foreach ($locale in $supportedLocales) {
+		$localeFile = $localeByCode[$locale]
+		if ($null -eq $localeFile) {
+			$localeFilePath = Join-Path $langDir ($locale + '.json')
+			$localeMap = [ordered]@{}
+			foreach ($key in $enKeys) {
+				$localeMap[$key] = [string]$enUs[$key]
+			}
+		} else {
+			$localeFilePath = $localeFile.FullName
+			$localeMap = Read-LangJsonOrdered -Path $localeFilePath
+		}
+
 		$newMap = [ordered]@{}
 		foreach ($key in $enKeys) {
 			if ($localeMap.Contains($key)) {
@@ -129,37 +137,44 @@ foreach ($master in $masters) {
 			}
 		}
 
-		# Determine whether this file would be rewritten.
 		$tmpPath = Join-Path ([System.IO.Path]::GetTempPath()) ("lang_sync_{0}_{1}.json" -f $locale, [System.Guid]::NewGuid().ToString('N'))
 		Write-LangJsonOrdered -Path $tmpPath -Object $newMap
 		$newText = Get-Content -LiteralPath $tmpPath -Raw -Encoding UTF8
 		Remove-Item -LiteralPath $tmpPath -Force
 
-		$oldText = Get-Content -LiteralPath $localeFile.FullName -Raw -Encoding UTF8
+		$oldText = if (Test-Path -LiteralPath $localeFilePath) {
+			Get-Content -LiteralPath $localeFilePath -Raw -Encoding UTF8
+		} else {
+			$null
+		}
+
 		if ($oldText -ne $newText) {
-			$rewritesNeeded.Add($localeFile.FullName) | Out-Null
+			$rewritesNeeded.Add($localeFilePath) | Out-Null
 			if (-not $Check) {
-				Write-LangJsonOrdered -Path $localeFile.FullName -Object $newMap
+				Write-LangJsonOrdered -Path $localeFilePath -Object $newMap
 			}
 		}
 
-		# Translation coverage gate: fail if locale looks like English fallback.
-		if ($locale -ne 'en_us' -and -not (Is-TranslationGateExempt -Locale $locale)) {
+		if ($locale -ne 'en_us' -and -not (Test-TranslationGateExempt -Locale $locale)) {
 			$sameCount = 0
 			foreach ($key in $enKeys) {
 				$val = $null
-				if ($localeMap.Contains($key)) { $val = [string]$localeMap[$key] }
+				if ($newMap.Contains($key)) { $val = [string]$newMap[$key] }
 				if ($null -eq $val -or $val -eq [string]$enUs[$key]) { $sameCount++ }
 			}
+
 			$ratio = if ($enKeys.Count -eq 0) { 0 } else { $sameCount / $enKeys.Count }
 			if ($ratio -ge $EnglishFallbackThreshold) {
-				$translationGateFailures.Add("$($localeFile.FullName) looks like English fallback ($([Math]::Round($ratio*100,2))% matches en_us)") | Out-Null
+				$translationGateFailures.Add("$localeFilePath looks like English fallback ($([Math]::Round($ratio * 100, 2))% matches en_us)") | Out-Null
 			}
 		}
 	}
 }
 
 if ($Check) {
+	if ($unsupportedLocaleFiles.Count -gt 0) {
+		Write-Error ("Unsupported locale files found. Remove them or add them to $LocaleManifestPath.`n- " + ($unsupportedLocaleFiles -join "`n- "))
+	}
 	if ($rewritesNeeded.Count -gt 0) {
 		Write-Error ("Lang files are out of sync with en_us.json. Run: pwsh -File ./tools/sync_lang_files.ps1`nWould rewrite:`n- " + ($rewritesNeeded -join "`n- "))
 	}
@@ -171,7 +186,7 @@ if ($Check) {
 }
 
 if ($rewritesNeeded.Count -gt 0) {
-	Write-Host "Updated lang files:" 
+	Write-Host "Updated lang files:"
 	$rewritesNeeded | ForEach-Object { Write-Host "- $_" }
 } else {
 	Write-Host "Lang files already up to date."

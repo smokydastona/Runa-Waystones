@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "Botoia 1",
+    "waystoneinjector.button.undergrown":  "Botoia 2",
+    "key.categories.waystoneinjector":  "Waystone botoi-injektorea",
+    "key.waystoneinjector.use_teleport_item":  "Erabili Waystonesen teleportazio objektua"
 }

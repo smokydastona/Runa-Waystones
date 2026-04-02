@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "Butoni 1",
+    "waystoneinjector.button.undergrown":  "Butoni 2",
+    "key.categories.waystoneinjector":  "Injektori i butonave Waystone",
+    "key.waystoneinjector.use_teleport_item":  "Përdor sendin e teleportit të Waystones"
 }

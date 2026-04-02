@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "Putan 1",
+    "waystoneinjector.button.undergrown":  "Putan 2",
+    "key.categories.waystoneinjector":  "In-stealladair putanan Waystone",
+    "key.waystoneinjector.use_teleport_item":  "Cleachd nì teleportaidh Waystones"
 }

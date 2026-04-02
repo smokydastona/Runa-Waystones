@@ -76,6 +76,14 @@ Add as many buttons as needed - just ensure labels and commands arrays have the 
 
 **DO NOT build locally!** This project uses GitHub Actions for automated builds.
 
+## Localization
+
+- One JSON file is kept for every Minecraft 1.20.1 locale in `src/main/resources/assets/waystoneinjector/lang/`.
+- `en_us.json` is the master file. Keep keys stable and update English values there first.
+- After any change to `en_us.json`, run `pwsh -File ./tools/sync_lang_files.ps1` so missing locale files or keys are seeded automatically.
+- When translating a non-English locale, keep the exact same keys and only change the values.
+- CI runs `pwsh -NoProfile -File ./tools/sync_lang_files.ps1 -Check` and fails if locale files are out of sync or if a non-exempt locale still looks like English fallback content.
+
 ### To get the latest build:
 1. Push your changes to GitHub
 2. GitHub Actions will automatically build the mod

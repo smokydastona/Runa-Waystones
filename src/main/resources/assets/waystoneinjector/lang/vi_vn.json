@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "Nút 1",
+    "waystoneinjector.button.undergrown":  "Nút 2",
+    "key.categories.waystoneinjector":  "Trình chèn nút Waystone",
+    "key.waystoneinjector.use_teleport_item":  "Dùng vật phẩm dịch chuyển của Waystones"
 }

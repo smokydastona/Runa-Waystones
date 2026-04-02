@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "按鈕一",
+    "waystoneinjector.button.undergrown":  "按鈕二",
+    "key.categories.waystoneinjector":  "路石按鈕注入器",
+    "key.waystoneinjector.use_teleport_item":  "用路石傳送之物"
 }

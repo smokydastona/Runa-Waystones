@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "Копче 1",
+    "waystoneinjector.button.undergrown":  "Копче 2",
+    "key.categories.waystoneinjector":  "Инјектор за копчиња Waystone",
+    "key.waystoneinjector.use_teleport_item":  "Користи го предметот за телепортација на Waystones"
 }

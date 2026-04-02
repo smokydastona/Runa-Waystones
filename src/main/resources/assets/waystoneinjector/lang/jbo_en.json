@@ -1,6 +1,6 @@
 {
-  `"waystoneinjector.button.chaos_town": "​Button 1",
-  `"waystoneinjector.button.undergrown": "​Button 2",
-  `"key.categories.waystoneinjector": "​Waystone Button Injector",
-  `"key.waystoneinjector.use_teleport_item": "​Use Waystones teleport item"
+    "waystoneinjector.button.chaos_town":  "batci 1",
+    "waystoneinjector.button.undergrown":  "batci 2",
+    "key.categories.waystoneinjector":  "jector lo batci pe la .ueiston.",
+    "key.waystoneinjector.use_teleport_item":  "pilno lo se muvdu be la .ueiston."
 }
