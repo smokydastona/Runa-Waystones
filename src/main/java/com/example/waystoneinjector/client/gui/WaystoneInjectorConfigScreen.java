@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.fml.config.ConfigTracker;
@@ -20,6 +21,7 @@ import javax.annotation.Nonnull;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +29,7 @@ import java.util.Set;
 @SuppressWarnings("null")
 public class WaystoneInjectorConfigScreen extends Screen {
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final String I18N = "screen.waystoneinjector.config.";
 
     private static final int TOP = 32;
     private static final int BOTTOM_PADDING = 36;
@@ -63,7 +66,7 @@ public class WaystoneInjectorConfigScreen extends Screen {
     }
 
     public WaystoneInjectorConfigScreen(Screen parent, Page page) {
-        super(Component.literal("Waystone Button Injector Config"));
+        super(Component.translatable(I18N + "title"));
         this.parent = parent;
         this.page = page == null ? Page.BUTTONS : page;
     }
@@ -77,13 +80,16 @@ public class WaystoneInjectorConfigScreen extends Screen {
         this.configPath = FMLPaths.CONFIGDIR.get().resolve("waystoneinjector-client.toml");
 
         int bottomY = this.height - 28;
-        this.addRenderableWidget(Button.builder(Component.literal("Save"), (b) -> onSave())
+        this.addRenderableWidget(Button.builder(text("action.save"), (b) -> onSave())
+            .tooltip(Tooltip.create(text("action.save.tooltip")))
             .bounds(this.width / 2 - 154, bottomY, 100, 20)
             .build());
-        this.addRenderableWidget(Button.builder(Component.literal("Back"), (b) -> onClose())
+        this.addRenderableWidget(Button.builder(text("action.back"), (b) -> onClose())
+            .tooltip(Tooltip.create(text("action.back.tooltip")))
             .bounds(this.width / 2 - 50, bottomY, 100, 20)
             .build());
-        this.addRenderableWidget(Button.builder(Component.literal("Open File"), (b) -> openConfigFile())
+        this.addRenderableWidget(Button.builder(text("action.open_file"), (b) -> openConfigFile())
+            .tooltip(Tooltip.create(text("action.open_file.tooltip")))
             .bounds(this.width / 2 + 54, bottomY, 100, 20)
             .build());
 
@@ -95,24 +101,26 @@ public class WaystoneInjectorConfigScreen extends Screen {
     private void buildRows() {
         switch (this.page) {
             case BUTTONS -> {
-                addHeader("Buttons");
+                addHeader(text("page.buttons"));
                 for (int i = 1; i <= 6; i++) {
                     addButtonSection(i);
                 }
             }
             case NETHER_PORTAL -> {
-                addHeader("Nether Portal");
+                addHeader(text("page.nether_portal"));
                 this.netherPortalVariantDropdown = addEnumDropdownRow(
-                    "Variant",
+                    text("field.variant"),
+                    tooltip("field.variant.tooltip"),
                     WaystoneConfig.NETHER_PORTAL_VARIANT.get(),
                     NetherPortalVariant.values(),
                     (val) -> WaystoneConfig.NETHER_PORTAL_VARIANT.set(val)
                 );
             }
             case FEVERDREAM -> {
-                addHeader("Feverdream");
+                addHeader(text("page.feverdream"));
                 this.feverdreamRedirects = addStringRow(
-                    "Redirects",
+                    text("field.redirects"),
+                    tooltip("field.redirects.tooltip"),
                     String.join(" ; ", WaystoneConfig.FEVERDREAM_REDIRECTS.get()),
                     (value) -> {
                         List<String> parsed = parseRedirectList(value);
@@ -122,7 +130,8 @@ public class WaystoneInjectorConfigScreen extends Screen {
                 );
 
                 addIntRow(
-                    "Death Count",
+                    text("field.death_count"),
+                    tooltip("field.death_count.tooltip"),
                     WaystoneConfig.FEVERDREAM_DEATH_COUNT.get(),
                     1,
                     10,
@@ -134,55 +143,65 @@ public class WaystoneInjectorConfigScreen extends Screen {
 
     private void addButtonSection(int idx) {
         String sectionId = "button" + idx;
-        addCollapsibleHeader("Button " + idx, sectionId);
+        addCollapsibleHeader(text("section.button", idx), sectionId, tooltip("section.button.tooltip", idx));
         ButtonSpec spec = ButtonSpec.of(idx);
 
-        addBooleanRow("Enabled", spec.enabled.get(), spec.enabled::set);
-        addStringRow("Label", spec.label.get(), spec.label::set, 256);
-        addStringRow("Command", spec.command.get(), spec.command::set, 512);
+        addBooleanRow(text("field.enabled"), tooltip("field.enabled.tooltip"), spec.enabled.get(), spec.enabled::set);
+        addStringRow(text("field.label"), tooltip("field.label.tooltip"), spec.label.get(), spec.label::set, 256);
+        addStringRow(text("field.command"), tooltip("field.command.tooltip"), spec.command.get(), spec.command::set, 512);
 
-        addIntRow("Width", spec.width.get(), 20, 200, spec.width::set);
-        addIntRow("Height", spec.height.get(), 15, 100, spec.height::set);
-        addStringRow("Text Color", spec.textColor.get(), spec.textColor::set, 32);
+        addIntRow(text("field.width"), tooltip("field.width.tooltip"), spec.width.get(), 20, 200, spec.width::set);
+        addIntRow(text("field.height"), tooltip("field.height.tooltip"), spec.height.get(), 15, 100, spec.height::set);
+        addStringRow(text("field.text_color"), tooltip("field.text_color.tooltip"), spec.textColor.get(), spec.textColor::set, 32);
 
-        addEnumStringRow("Side", spec.side.get(), new String[] { "auto", "left", "right" }, spec.side::set);
-        addStringRow("Server Address", spec.serverAddress.get(), spec.serverAddress::set, 256);
-        addIntRow("X Offset", spec.xOffset.get(), -500, 500, spec.xOffset::set);
-        addIntRow("Y Offset", spec.yOffset.get(), -500, 500, spec.yOffset::set);
+        addEnumStringRow(text("field.side"), tooltip("field.side.tooltip"), spec.side.get(), new String[] { "auto", "left", "right" }, spec.side::set);
+        addStringRow(text("field.server_address"), tooltip("field.server_address.tooltip"), spec.serverAddress.get(), spec.serverAddress::set, 256);
+        addIntRow(text("field.x_offset"), tooltip("field.x_offset.tooltip"), spec.xOffset.get(), -500, 500, spec.xOffset::set);
+        addIntRow(text("field.y_offset"), tooltip("field.y_offset.tooltip"), spec.yOffset.get(), -500, 500, spec.yOffset::set);
 
-        addStringRow("Death Redirect", spec.deathRedirect.get(), spec.deathRedirect::set, 512);
-        addStringRow("Sleep Redirect", spec.sleepRedirect.get(), spec.sleepRedirect::set, 512);
-        addIntRow("Sleep Chance", spec.sleepChance.get(), 0, 100, spec.sleepChance::set);
+        addStringRow(text("field.death_redirect"), tooltip("field.death_redirect.tooltip"), spec.deathRedirect.get(), spec.deathRedirect::set, 512);
+        addStringRow(text("field.sleep_redirect"), tooltip("field.sleep_redirect.tooltip"), spec.sleepRedirect.get(), spec.sleepRedirect::set, 512);
+        addIntRow(text("field.sleep_chance"), tooltip("field.sleep_chance.tooltip"), spec.sleepChance.get(), 0, 100, spec.sleepChance::set);
     }
 
-    private void addHeader(String text) {
+    private static Component text(String key, Object... args) {
+        return Component.translatable(I18N + key, args);
+    }
+
+    private static List<Component> tooltip(String key, Object... args) {
+        return Arrays.stream(text(key, args).getString().split("\\n"))
+            .<Component>map(Component::literal)
+            .toList();
+    }
+
+    private void addHeader(Component text) {
         rows.add(Row.header(text));
     }
 
-    private void addCollapsibleHeader(String text, String sectionId) {
+    private void addCollapsibleHeader(Component text, String sectionId, List<Component> tooltip) {
         // Default to expanded for Button 1, collapsed for the rest.
         // This preserves usability while still keeping every option available.
         if (sectionId != null && sectionId.startsWith("button") && !sectionId.equals("button1")) {
             collapsedSections.add(sectionId);
         }
-        rows.add(Row.collapsibleHeader(text, sectionId));
+        rows.add(Row.collapsibleHeader(text, sectionId, tooltip));
     }
 
-    private EditBox addStringRow(String label, String initial, java.util.function.Consumer<String> apply, int maxLen) {
-        EditBox box = new EditBox(this.font, 0, 0, 220, 18, Component.literal(label));
+    private EditBox addStringRow(Component label, List<Component> tooltip, String initial, java.util.function.Consumer<String> apply, int maxLen) {
+        EditBox box = new EditBox(this.font, 0, 0, 220, 18, label);
         box.setMaxLength(maxLen);
         box.setValue(initial == null ? "" : initial);
-        rows.add(Row.withWidget(label, box, () -> apply.accept(box.getValue()), currentSection()));
+        rows.add(Row.withWidget(label, tooltip, box, () -> apply.accept(box.getValue()), currentSection()));
         this.addRenderableWidget(box);
         return box;
     }
 
-    private void addIntRow(String label, int initial, int min, int max, java.util.function.IntConsumer apply) {
-        EditBox box = new EditBox(this.font, 0, 0, 100, 18, Component.literal(label));
+    private void addIntRow(Component label, List<Component> tooltip, int initial, int min, int max, java.util.function.IntConsumer apply) {
+        EditBox box = new EditBox(this.font, 0, 0, 100, 18, label);
         box.setMaxLength(16);
         box.setValue(Integer.toString(initial));
         box.setFilter((s) -> s.isEmpty() || s.matches("-?\\d+"));
-        rows.add(Row.withWidget(label, box, () -> {
+        rows.add(Row.withWidget(label, tooltip, box, () -> {
             int parsed = parseIntClamped(box.getValue(), initial, min, max);
             apply.accept(parsed);
             box.setValue(Integer.toString(parsed));
@@ -190,28 +209,28 @@ public class WaystoneInjectorConfigScreen extends Screen {
         this.addRenderableWidget(box);
     }
 
-    private void addBooleanRow(String label, boolean initial, java.util.function.Consumer<Boolean> apply) {
+    private void addBooleanRow(Component label, List<Component> tooltip, boolean initial, java.util.function.Consumer<Boolean> apply) {
         ToggleButton toggle = new ToggleButton(0, 0, 100, 20, initial);
-        rows.add(Row.withWidget(label, toggle, () -> apply.accept(toggle.value()), currentSection()));
+        rows.add(Row.withWidget(label, tooltip, toggle, () -> apply.accept(toggle.value()), currentSection()));
         this.addRenderableWidget(toggle);
     }
 
-    private void addEnumStringRow(String label, String initial, String[] values, java.util.function.Consumer<String> apply) {
+    private void addEnumStringRow(Component label, List<Component> tooltip, String initial, String[] values, java.util.function.Consumer<String> apply) {
         CycleButton<String> cycle = new CycleButton<>(0, 0, 140, 20, values, initial);
-        rows.add(Row.withWidget(label, cycle, () -> apply.accept(cycle.value()), currentSection()));
+        rows.add(Row.withWidget(label, tooltip, cycle, () -> apply.accept(cycle.value()), currentSection()));
         this.addRenderableWidget(cycle);
     }
 
     @SuppressWarnings("unused")
     private <T extends Enum<T>> void addEnumRow(String label, T initial, T[] values, java.util.function.Consumer<T> apply) {
         CycleButton<T> cycle = new CycleButton<>(0, 0, 180, 20, values, initial);
-        rows.add(Row.withWidget(label, cycle, () -> apply.accept(cycle.value()), currentSection()));
+        rows.add(Row.withWidget(Component.literal(label), List.of(), cycle, () -> apply.accept(cycle.value()), currentSection()));
         this.addRenderableWidget(cycle);
     }
 
-    private <T> DropdownButton<T> addEnumDropdownRow(String label, T initial, T[] values, java.util.function.Consumer<T> apply) {
+    private <T> DropdownButton<T> addEnumDropdownRow(Component label, List<Component> tooltip, T initial, T[] values, java.util.function.Consumer<T> apply) {
         DropdownButton<T> dropdown = new DropdownButton<>(0, 0, 180, 20, values, initial);
-        rows.add(Row.withWidget(label, dropdown, () -> apply.accept(dropdown.value()), currentSection()));
+        rows.add(Row.withWidget(label, tooltip, dropdown, () -> apply.accept(dropdown.value()), currentSection()));
         this.addRenderableWidget(dropdown);
         return dropdown;
     }
@@ -405,13 +424,13 @@ public class WaystoneInjectorConfigScreen extends Screen {
             if (y + row.height >= TOP && y <= viewBottom) {
                 int color = row.isHeader ? 0xFFD080 : 0xE0E0E0;
 
-                String label = row.label;
+                Component label = row.label;
                 if (row.isSectionHeader && row.collapsible && row.sectionId != null) {
                     boolean collapsed = collapsedSections.contains(row.sectionId);
-                    label = (collapsed ? "[+] " : "[-] ") + label;
+                    label = Component.literal(collapsed ? "[+] " : "[-] ").append(label);
                 }
 
-                graphics.drawString(this.font, Component.literal(label), labelX, y + (row.isHeader ? 4 : 6), color);
+                graphics.drawString(this.font, label, labelX, y + (row.isHeader ? 4 : 6), color);
             }
             y += row.height;
         }
@@ -423,6 +442,23 @@ public class WaystoneInjectorConfigScreen extends Screen {
         // Ensure widgets are positioned for this frame.
         updateWidgetPositions();
         super.render(graphics, mouseX, mouseY, partialTick);
+
+        List<Component> hoveredTooltip = findHoveredRowTooltip(mouseX, mouseY, labelX);
+        if (hoveredTooltip != null && !hoveredTooltip.isEmpty()) {
+            graphics.renderComponentTooltip(this.font, hoveredTooltip, mouseX, mouseY);
+        }
+    }
+
+    private List<Component> findHoveredRowTooltip(int mouseX, int mouseY, int labelX) {
+        for (Row row : rows) {
+            if (!row.visible || row.tooltip.isEmpty()) {
+                continue;
+            }
+            if (row.isMouseOverLabel(mouseX, mouseY, labelX, this.width - 26) || row.isMouseOverWidget(mouseX, mouseY)) {
+                return row.tooltip;
+            }
+        }
+        return null;
     }
 
     private static int parseIntClamped(String value, int fallback, int min, int max) {
@@ -457,7 +493,8 @@ public class WaystoneInjectorConfigScreen extends Screen {
     }
 
     private static final class Row {
-        final String label;
+        final Component label;
+        final List<Component> tooltip;
         final boolean isHeader;
         final boolean isSectionHeader;
         final boolean collapsible;
@@ -466,8 +503,12 @@ public class WaystoneInjectorConfigScreen extends Screen {
         final List<net.minecraft.client.gui.components.AbstractWidget> widgets;
         final Runnable apply;
 
+        private int y;
+        private boolean visible;
+
         private Row(
-            String label,
+            Component label,
+            List<Component> tooltip,
             boolean isHeader,
             boolean isSectionHeader,
             boolean collapsible,
@@ -477,6 +518,7 @@ public class WaystoneInjectorConfigScreen extends Screen {
             Runnable apply
         ) {
             this.label = label;
+            this.tooltip = tooltip;
             this.isHeader = isHeader;
             this.isSectionHeader = isSectionHeader;
             this.collapsible = collapsible;
@@ -486,19 +528,20 @@ public class WaystoneInjectorConfigScreen extends Screen {
             this.apply = apply;
         }
 
-        static Row header(String label) {
-            return new Row(label, true, false, false, null, HEADER_H, List.of(), () -> {});
+        static Row header(Component label) {
+            return new Row(label, List.of(), true, false, false, null, HEADER_H, List.of(), () -> {});
         }
 
-        static Row collapsibleHeader(String label, String sectionId) {
-            return new Row(label, true, true, true, sectionId, HEADER_H, List.of(), () -> {});
+        static Row collapsibleHeader(Component label, String sectionId, List<Component> tooltip) {
+            return new Row(label, tooltip, true, true, true, sectionId, HEADER_H, List.of(), () -> {});
         }
 
-        static Row withWidget(String label, net.minecraft.client.gui.components.AbstractWidget widget, Runnable apply, String sectionId) {
-            return new Row(label, false, false, false, sectionId, ROW_H, List.of(widget), apply);
+        static Row withWidget(Component label, List<Component> tooltip, net.minecraft.client.gui.components.AbstractWidget widget, Runnable apply, String sectionId) {
+            return new Row(label, tooltip, false, false, false, sectionId, ROW_H, List.of(widget), apply);
         }
 
         void setY(int y) {
+            this.y = y;
             int widgetX = 0;
             for (net.minecraft.client.gui.components.AbstractWidget w : widgets) {
                 widgetX = w.getWidth() == 100 ?  thisWidgetX(100) : thisWidgetX(w.getWidth());
@@ -513,10 +556,24 @@ public class WaystoneInjectorConfigScreen extends Screen {
         }
 
         void setVisible(boolean visible) {
+            this.visible = visible;
             for (net.minecraft.client.gui.components.AbstractWidget w : widgets) {
                 w.visible = visible;
                 w.active = visible;
             }
+        }
+
+        boolean isMouseOverLabel(int mouseX, int mouseY, int labelX, int labelRight) {
+            return mouseY >= this.y && mouseY < this.y + this.height && mouseX >= labelX && mouseX <= labelRight;
+        }
+
+        boolean isMouseOverWidget(int mouseX, int mouseY) {
+            for (net.minecraft.client.gui.components.AbstractWidget w : widgets) {
+                if (w.visible && w.isMouseOver(mouseX, mouseY)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         void apply() {
@@ -545,7 +602,7 @@ public class WaystoneInjectorConfigScreen extends Screen {
         }
 
         private static Component labelFor(boolean v) {
-            return Component.literal(v ? "ON" : "OFF");
+            return Component.translatable(I18N + (v ? "toggle.on" : "toggle.off"));
         }
     }
 
