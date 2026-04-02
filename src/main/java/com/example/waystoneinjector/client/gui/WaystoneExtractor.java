@@ -16,7 +16,6 @@ import java.util.List;
  * Phase 2: This will be enhanced to actually extract waystone data
  * For now, returns dummy data for testing
  */
-@SuppressWarnings("null")
 public class WaystoneExtractor {
     
     /**
