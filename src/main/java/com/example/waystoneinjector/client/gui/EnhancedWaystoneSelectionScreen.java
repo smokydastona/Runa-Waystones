@@ -28,8 +28,7 @@ public class EnhancedWaystoneSelectionScreen extends Screen {
     private static final ResourceLocation ZE_VOIDROBE_BUTTON_SHEET = new ResourceLocation(
         "waystoneinjector", "textures/gui/ze_voidrobe_button.png"
     );
-    
-    @SuppressWarnings("unused")
+
     private final Screen originalScreen;
     private final List<WaystoneData> allWaystones;
     private List<WaystoneData> filteredWaystones;
